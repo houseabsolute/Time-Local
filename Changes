@@ -1,10 +1,13 @@
-1.0x
+1.08    2004-04-07
 
 - Changed occurences of "UTC" to "GMT" in order to agree with POSIX,
 which defines the epoch in terms of GMT.
 
 - Documented the behavior of timelocal() when given a local time that
 does not exist (due to a DST change).  Suggested by Nick Ing-Simmons.
+
+- Don't expect edge case tests to pass on AIX 4.3, since the OS is
+obselete.  Patch from core passed on my H. Merijn Brand.
 
 
 1.07_94  2003-12-11
