@@ -114,12 +114,12 @@ ok(sprintf('%x', timelocal(localtime(0x7fffffff))), sprintf('%x', 0x7fffffff),
         for (1..20)
         {
             my $result = timelocal(localtime($time));
-            ok($time, $result,
-               "round trip via localtime -> timelocal should always work ($time)");
+            ok($time - $result, 0,
+               "round trip via localtime -> timelocal should always work ($time -> $result)");
 
             $result = timegm(gmtime($time));
-            ok($time, $result,
-               "round trip via gmtime -> timegm should always work ($time)");
+            ok($time - $result, 0,
+               "round trip via gmtime -> timegm should always work ($time -> $result)");
 
             $time += 300;
         }
