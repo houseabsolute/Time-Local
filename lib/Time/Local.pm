@@ -253,7 +253,7 @@ values, the following conventions are followed:
 
 Years greater than 999 are interpreted as being the actual year,
 rather than the offset from 1900.  Thus, 1963 would indicate the year
-Martin Luther King won the Nobel prize, not the year 2863.
+Martin Luther King won the Nobel prize, not the year 3863.
 
 =item *
 
