@@ -291,6 +291,17 @@ When given an ambiguous local time, the timelocal() function should
 always return the epoch for the I<earlier> of the two possible UTC
 times.
 
+=head2 Negative Epoch Values
+
+Negative epoch (time_t) values are not officially supported by the
+POSIX standards, so this module's tests do not test them.  On some
+systems, they are known not to work.  These include MacOS (pre-OSX)
+and Win32.
+
+On systems which do support negative epoch values, this module should
+be able to cope with dates before the start of the epoch, down the
+minimum value of time_t for the system.
+
 =head1 IMPLEMENTATION
 
 These routines are quite efficient and yet are always guaranteed to agree
