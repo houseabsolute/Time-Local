@@ -7,7 +7,7 @@ use strict;
 use integer;
 
 use vars qw( $VERSION @ISA @EXPORT @EXPORT_OK );
-$VERSION    = '1.10';
+$VERSION    = '1.11';
 $VERSION    = eval $VERSION;
 @ISA	= qw( Exporter );
 @EXPORT	= qw( timegm timelocal );
@@ -259,8 +259,8 @@ values, the following conventions are followed:
 =item *
 
 Years greater than 999 are interpreted as being the actual year,
-rather than the offset from 1900.  Thus, 1963 would indicate the year
-Martin Luther King won the Nobel prize, not the year 3863.
+rather than the offset from 1900.  Thus, 1964 would indicate the year
+Martin Luther King won the Nobel prize, not the year 3864.
 
 =item *
 
