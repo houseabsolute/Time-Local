@@ -105,7 +105,7 @@ ok(sprintf('%x', timelocal(localtime(0x7fffffff))), sprintf('%x', 0x7fffffff),
 
 eval { require POSIX; POSIX::tzset() };
 if ($@) {
-    skip("Cannot call POSIX::tzset() on this platform\n");
+    skip("Cannot call POSIX::tzset() on this platform\n") for 1..3;
 }
 else
 {
