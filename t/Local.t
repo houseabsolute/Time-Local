@@ -50,7 +50,7 @@ my @bad_time =
 # use vmsish 'time' makes for oddness around the Unix epoch
 if ($^O eq 'VMS') { $time[0][2]++ }
 
-my $tests = (@time * 12) + 6;
+my $tests = (@time * 12) + 8;
 $tests += @bad_time;
 $tests += 2 if $ENV{PERL_CORE};
 $tests += 5 if $ENV{MAINTAINER};
@@ -125,6 +125,12 @@ ok(timegm(0,0,0, 1, 2, 80) - timegm(0,0,0, 1, 0, 80), 60 * 24 * 3600,
     ok($hour == 2 || $hour == 3, 1, 'hour should be 2 or 3');
 }
 
+eval { timegm(0,0,0,29,1,1900) };
+ok($@, qr/Day '29' out of range 1\.\.28/);
+
+eval { timegm(0,0,0,29,1,1904) };
+ok($@, '');
+
 # round trip was broken for edge cases
 if ($^O eq "aix" && $Config{osvers} =~ m/^4\.3\./) {
     skip( 1, "No fix expected for edge case test for $_ on AIX 4.3") for qw( timegm timelocal );
@@ -135,6 +141,7 @@ if ($^O eq "aix" && $Config{osvers} =~ m/^4\.3\./) {
     ok(sprintf('%x', timelocal(localtime(0x7fffffff))), sprintf('%x', 0x7fffffff),
        '0x7fffffff round trip through localtime then timelocal');
 }
+
 
 if ($ENV{MAINTAINER}) {
     eval { require POSIX; POSIX::tzset() };
