@@ -1,0 +1,10 @@
+Changes
+lib/Time/Local.pm
+LICENSE
+Makefile.PL
+MANIFEST
+MANIFEST.SKIP
+META.yml			Module meta-data in YAML
+README
+t/Local.t
+Time-Local-1.05/META.yml
