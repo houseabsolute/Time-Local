@@ -2,7 +2,7 @@
 
 - Fixed behavior for edge cases like timegm(gmtime(0x7FFF_FFFF)),
 which should work even on platforms where time_t is signed.  Patch
-from Henrik Gulbradsen.
+from Henrik Gulbrandsen.
 
 
 1.07  2003-06-10
