@@ -37,14 +37,14 @@ if ($^O eq 'MacOS') {
     # On Win32 (and others?) time_t appears to be signed, but negative
     # epochs still don't work. - XXX - this is experimental
     $MinInt = 0
-        unless defined ( (localtime(-1))[0] );
+        unless defined ((localtime(-1))[0]);
 }
 
 $Max{Day} = ($MaxInt >> 1) / 43200;
-$Min{Day} = ($MinInt)? -($Max{Day}+1) : 0;
+$Min{Day} = $MinInt ? -($Max{Day} + 1) : 0;
 
-$Max{Sec} =  $MaxInt - 86400 * $Max{Day};
-$Min{Sec} =  $MinInt - 86400 * $Min{Day};
+$Max{Sec} = $MaxInt - 86400 * $Max{Day};
+$Min{Sec} = $MinInt - 86400 * $Min{Day};
 
 # Determine the EPOC day for this machine
 my $Epoc = 0;
