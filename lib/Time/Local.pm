@@ -7,7 +7,8 @@ use strict;
 use integer;
 
 use vars qw( $VERSION @ISA @EXPORT @EXPORT_OK );
-$VERSION    = '1.07';
+$VERSION    = '1.07_90';
+$VERSION    = eval $VERSION;
 @ISA	= qw( Exporter );
 @EXPORT	= qw( timegm timelocal );
 @EXPORT_OK	= qw( timegm_nocheck timelocal_nocheck );
@@ -22,10 +23,23 @@ my $NextCentury  = $ThisYear - $ThisYear % 100;
 my $Century      = $NextCentury - 100;
 my $SecOff       = 0;
 
-my (%Options, %Cheat);
+my (%Options, %Cheat, %Min, %Max);
+my ($MinInt, $MaxInt);
 
-my $MaxInt = ((1<<(8 * $Config{intsize} - 2))-1)*2 + 1;
-my $MaxDay = int(($MaxInt-43200)/86400)-1;
+if ($^O eq 'MacOS') {
+    # time_t is unsigned...
+    $MaxInt = (1 << (8 * $Config{intsize})) - 1;
+    $MinInt = 0;
+} else {
+    $MaxInt = ((1 << (8 * $Config{intsize} - 2))-1)*2 + 1;
+    $MinInt = 0; # Or -$MaxInt-1 if negative is OK...
+}
+
+$Max{Day} = ($MaxInt >> 1) / 43200;
+$Min{Day} = ($MinInt)? -($Max{Day}+1) : 0;
+
+$Max{Sec} =  $MaxInt - 86400 * $Max{Day};
+$Min{Sec} =  $MinInt - 86400 * $Min{Day};
 
 # Determine the EPOC day for this machine
 my $Epoc = 0;
@@ -37,7 +51,6 @@ if ($^O eq 'vos') {
 elsif ($^O eq 'MacOS') {
   no integer;
 
-  $MaxDay *=2 if $^O eq 'MacOS';  # time_t unsigned ... quick hack?
   # MacOS time() is seconds since 1 Jan 1904, localtime
   # so we need to calculate an offset to apply later
   $Epoc = 693901;
@@ -65,6 +78,17 @@ sub _timegm {
     no integer;
 
     $sec +  86400 * &_daygm;
+}
+
+
+sub _zoneadjust {
+    my ($day, $sec, $time) = @_;
+
+    $sec = $sec + _timegm(localtime($time)) - $time;
+    if ($sec > 86400) { $day++; $sec -= 86400; }
+    if ($sec < 0)     { $day--; $sec += 86400; }
+
+    ($day, $sec);
 }
 
 
@@ -96,17 +120,19 @@ sub timegm {
     }
 
     my $days = _daygm(undef, undef, undef, $mday, $month, $year);
+    my $xsec = $sec + $SecOff + 60*$min + 3600*$hour;
 
-    unless ($Options{no_range_check} or abs($days) < $MaxDay) {
+    unless ($Options{no_range_check}
+        or  ($days > $Min{Day} or $days == $Min{Day} and $xsec >= $Min{Sec})
+       and  ($days < $Max{Day} or $days == $Max{Day} and $xsec <= $Max{Sec}))
+    {
 	$year += 1900;
 	croak "Cannot handle date ($sec, $min, $hour, $mday, $month, $year)";
     }
 
-    $sec += $SecOff + 60*$min + 3600*$hour;
-
     no integer;
 
-    $sec + 86400*$days;
+    $xsec + 86400 * $days;
 }
 
 
@@ -117,7 +143,9 @@ sub timegm_nocheck {
 
 
 sub timelocal {
-    no integer;
+    local ($Max{Day}, $Max{Sec}) = _zoneadjust($Max{Day}, $Max{Sec}, $MaxInt);
+    local ($Min{Day}, $Min{Sec}) = _zoneadjust($Min{Day}, $Min{Sec}, $MinInt);
+
     my $ref_t = &timegm;
     my $loc_t = _timegm(localtime($ref_t));
 
