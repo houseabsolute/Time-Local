@@ -338,11 +338,11 @@ The whole scheme for interpreting two-digit years can be considered a bug.
 
 =head1 SUPPORT
 
-Support for this module is provided via the perl5-porters@perl.org
+Support for this module is provided via the datetime@perl.org
 email list.  See http://lists.perl.org/ for more details.
 
-Please submit bugs using the RT system at bugs.perl.org, the perlbug
-script, or as a last resort, to the perl5-porters@perl.org list.
+Please submit bugs using the RT system at rt.cpan.org, or as a last
+resort, to the datetime@perl.org list.
 
 =head1 AUTHOR
 
