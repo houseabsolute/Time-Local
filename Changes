@@ -1,3 +1,14 @@
+1.06
+
+- A bug in the handling of negative offsets from UTC could lead to the
+return of invalid times during a DST transition.  This is from a patch
+by Dave Mitchell currently in bleadperl.  See
+http://bugs6.perl.org/rt2/Ticket/Display.html?id=19393 for details.
+
+- Updated the AUTHORS section to include the actual authors.  Thanks
+to Graham Barr for telling me who there are.
+
+
 1.05  2003-06-03
 
 This version is nearly identical to version 1.04, which is included in
