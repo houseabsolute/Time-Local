@@ -7,7 +7,7 @@ use strict;
 use integer;
 
 use vars qw( $VERSION @ISA @EXPORT @EXPORT_OK );
-$VERSION    = '1.07_90';
+$VERSION    = '1.07_91';
 $VERSION    = eval $VERSION;
 @ISA	= qw( Exporter );
 @EXPORT	= qw( timegm timelocal );
@@ -143,11 +143,14 @@ sub timegm_nocheck {
 
 
 sub timelocal {
+    # Adjust Max/Min allowed times to fit local time zone and call timegm
     local ($Max{Day}, $Max{Sec}) = _zoneadjust($Max{Day}, $Max{Sec}, $MaxInt);
     local ($Min{Day}, $Min{Sec}) = _zoneadjust($Min{Day}, $Min{Sec}, $MinInt);
-
     my $ref_t = &timegm;
-    my $loc_t = _timegm(localtime($ref_t));
+
+    # Calculate first guess with a one-day delta to avoid localtime overflow
+    my $delta = ($_[5] < 100)? 86400 : -86400;
+    my $loc_t = _timegm(localtime( $ref_t + $delta )) - $delta;
 
     # Is there a timezone offset from GMT or are we done
     my $zone_off = $ref_t - $loc_t
@@ -272,6 +275,18 @@ from Dec 1901 to Jan 2038.
 Both timelocal() and timegm() croak if given dates outside the supported
 range.
 
+=head2 Ambiguous Local Times (DST)
+
+Because of DST changes, there are many time zones where the same local
+time occurs for two different UTC times on the same day.  For example,
+in the "Europe/Paris" time zone, the local time of 2001-10-28 02:30:00
+can represent either 2001-10-28 00:30:00 UTC, B<or> 2001-10-28
+01:30:00 UTC.
+
+When given an ambiguous local time, the timelocal() function should
+always return the epoch for the I<earlier> of the two possible UTC
+times.
+
 =head1 IMPLEMENTATION
 
 These routines are quite efficient and yet are always guaranteed to agree
@@ -291,8 +306,6 @@ also be correct.
 =head1 BUGS
 
 The whole scheme for interpreting two-digit years can be considered a bug.
-
-The proclivity to croak() is probably a bug.
 
 =head1 SUPPORT
 
