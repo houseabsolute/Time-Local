@@ -151,9 +151,9 @@ if ($ENV{MAINTAINER}) {
 if ($ENV{PERL_CORE}) {
   package test;
   require 'timelocal.pl';
-  ok(timegm(0,0,0,1,0,80), main::timegm(0,0,0,1,0,80),
+  ::ok(timegm(0,0,0,1,0,80), main::timegm(0,0,0,1,0,80),
      'timegm in timelocal.pl');
 
-  ok(timelocal(1,2,3,4,5,88), main::timelocal(1,2,3,4,5,88),
+  ::ok(timelocal(1,2,3,4,5,88), main::timelocal(1,2,3,4,5,88),
      'timelocal in timelocal.pl');
 }
