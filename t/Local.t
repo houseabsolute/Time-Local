@@ -110,7 +110,7 @@ ok(sprintf('%x', timelocal(localtime(0x7fffffff))), sprintf('%x', 0x7fffffff),
     if ($@) {
         skip(1, "cannot set time zone to Europe/Vienna") for 1..10;
     } else {
-        my $time = 1004220198;
+        my $time = 1004226198;
         for (1..20)
         {
             my $result = timelocal(localtime($time));
