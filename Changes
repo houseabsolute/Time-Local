@@ -1,3 +1,9 @@
+1.07  2003-06-10
+
+- Set INSTALLDIRS=perl in Makefile.PL, as suggested by Michael
+Schwern, who heard it from Sergio Brandano.
+
+
 1.06  2003-06-04
 
 - A bug in the handling of negative offsets from UTC could lead to the
