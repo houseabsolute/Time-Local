@@ -1,3 +1,10 @@
+1.07_92  2003-07-22
+
+- Removed tests which relied on the zoneinfo database to be up to date
+and accurate in order to pass, since we have absolutely no control
+over this whatsoever.  I hate external dependencies.
+
+
 1.07_91  2003-07-22
 
 - Henrik refined his edge case fix to work on Win32, which apparently
