@@ -53,7 +53,7 @@ my @neg_time =
      [ 1950, 04, 12, 9, 30, 31 ],
     );
 
-my $neg_time_ok = defined ((localtime(-3600))[0]) ? 1 : 0;
+my $neg_epoch_ok = defined ((localtime(-3600))[0]) ? 1 : 0;
 
 # use vmsish 'time' makes for oddness around the Unix epoch
 if ($^O eq 'VMS') { $time[0][2]++ }
@@ -74,7 +74,7 @@ for (@time, @neg_time) {
 
     if ($^O eq 'vos' && $year == 70) {
         skip(1, "skipping 1970 test on VOS.\n") for 1..6;
-    } elsif ($year < 70 && ! $neg_time_ok) {
+    } elsif ($year < 70 && ! $neg_epoch_ok) {
         skip(1, "skipping negative epoch.\n") for 1..6;
     } else {
         my $year_in = $year < 70 ? $year + 1900 : $year;
@@ -92,7 +92,7 @@ for (@time, @neg_time) {
 
     if ($^O eq 'vos' && $year == 70) {
         skip(1, "skipping 1970 test on VOS.\n") for 1..6;
-    } elsif ($year < 70 && ! $neg_time_ok) {
+    } elsif ($year < 70 && ! $neg_epoch_ok) {
         skip(1, "skipping negative epoch.\n") for 1..6;
     } else {
         my $year_in = $year < 70 ? $year + 1900 : $year;
@@ -141,11 +141,15 @@ ok(timegm(0,0,0, 1, 2, 80) - timegm(0,0,0, 1, 0, 80), 60 * 24 * 3600,
     ok($hour == 2 || $hour == 3, 1, 'hour should be 2 or 3');
 }
 
-eval { timegm(0,0,0,29,1,1900) };
-ok($@, qr/Day '29' out of range 1\.\.28/);
+if ($neg_epoch_ok) {
+    eval { timegm(0,0,0,29,1,1900) };
+    ok($@, qr/Day '29' out of range 1\.\.28/);
 
-eval { timegm(0,0,0,29,1,1904) };
-ok($@, '');
+    eval { timegm(0,0,0,29,1,1904) };
+    ok($@, '');
+} else {
+    skip(1, "skipping negative epoch.\n") for 1..6;
+}
 
 # round trip was broken for edge cases
 if ($^O eq "aix" && $Config{osvers} =~ m/^4\.3\./) {
