@@ -1,4 +1,4 @@
-1.05
+1.05  2003-06-03
 
 This version is nearly identical to version 1.04, which is included in
 the Perl core, but it removes the use of "our" in order to make the
@@ -16,3 +16,5 @@ Changes made from the core version include:
 module uses the local system's epoch, not the Unix epoch, contrary to
 what the documentation suggests.
 
+- Disabled tests for timelocal.pl Perl4 library since it's not
+included in standalone distribution.
