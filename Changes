@@ -1,3 +1,12 @@
+1.0x
+
+- Changed occurences of "UTC" to "GMT" in order to agree with POSIX,
+which defines the epoch in terms of GMT.
+
+- Documented the behavior of timelocal() when given a local time that
+does not exist (due to a DST change).  Suggested by Nick Ing-Simmons.
+
+
 1.07_94  2003-12-11
 
 - More changes from Henrik Gulbrandsen to make sure that very large
