@@ -63,9 +63,9 @@ for (@time) {
     if ($^O eq 'vos' && $year == 70) {
         skip(1, "skipping 1970 test on VOS.\n") for 1..6;
     } else {
-        my $time = timelocal($sec,$min,$hour,$mday,$mon,$year);
+        my $time = timegm($sec,$min,$hour,$mday,$mon,$year);
 
-        my($s,$m,$h,$D,$M,$Y) = localtime($time);
+        my($s,$m,$h,$D,$M,$Y) = gmtime($time);
 
         ok($s, $sec, 'second');
         ok($m, $min, 'minute');
