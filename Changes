@@ -1,3 +1,11 @@
+1.11    2005-02-09
+
+- Try to make detection of supported epoch range a little smarter.
+The detection was allowing negative epochs on Win32 but apparently
+this doesn't work, and trying to pass a pre-epoch date in just causes
+a lot of warnings.
+
+
 1.10    2004-04-20
 
 - Fix compilation failure with older Test.pm (including the versions
