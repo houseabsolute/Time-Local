@@ -1,3 +1,17 @@
+1.07_94  2003-12-11
+
+- More changes from Henrik Gulbrandsen to make sure that very large
+negative epoch values are handled properly on platforms that can
+handle negative epoch values at all.
+
+- Make sure that we really do always return the earliest of two local
+times when DST makes a conversion from GMT to local time ambiguous.
+Again by Henrik.
+
+- Fix a bug that could have occurred if the maximum or minimum integer
+size on a platform was divisible by 86,400.  Also by Henrik.
+
+
 1.07_93  2003-07-23
 
 - Henrik's code explicitly didn't work with negative epoch values,
