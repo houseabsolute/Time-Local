@@ -35,7 +35,7 @@ if ($^O eq 'VMS') { $time[0][2]++ }
 
 my $tests = (@time * 12) + 6;
 $tests += 2 if $ENV{PERL_CORE};
-$tests += 3 if $ENV{MAINTAINER};
+$tests += 5 if $ENV{MAINTAINER};
 
 plan tests => $tests;
 
@@ -122,11 +122,15 @@ if ($ENV{MAINTAINER}) {
         local $ENV{TZ} = 'America/Chicago';
         POSIX::tzset();
 
-        # Same local time in America/Chicago.  There is transition here as
-        # well.
+        # Same local time in America/Chicago.  There is a transition
+        # here as well.
         $time = timelocal(0, 30, 1, 28, 9, 101);
         ok($time, 1004250600,
            'timelocal prefers earlier epoch in the presence of a DST change');
+
+        $time = timelocal(0, 30, 2, 1, 3, 101);
+        ok($time, 986113800,
+           'timelocal for non-existent time gives you the time one hour later');
 
         local $ENV{TZ} = 'Australia/Sydney';
         POSIX::tzset();
@@ -137,6 +141,10 @@ if ($ENV{MAINTAINER}) {
         $time = timelocal(0, 30, 2, 25, 2, 101);
         ok($time, 985447800,
            'timelocal prefers earlier epoch in the presence of a DST change');
+
+        $time = timelocal(0, 30, 2, 28, 9, 101);
+        ok($time, 1004200200,
+           'timelocal for non-existent time gives you the time one hour later');
     }
 }
 
