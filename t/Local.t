@@ -148,7 +148,7 @@ if ($neg_epoch_ok) {
     eval { timegm(0,0,0,29,1,1904) };
     ok($@, '');
 } else {
-    skip(1, "skipping negative epoch.\n") for 1..6;
+    skip(1, "skipping negative epoch.\n") for 1..2;
 }
 
 # round trip was broken for edge cases
