@@ -23,6 +23,7 @@ my @time =
    [1999, 12, 31, 23, 59, 59],
    [2000,  1,  1, 00, 00, 00],
    [2010, 10, 12, 14, 13, 12],
+   # leap day
    [2020,  2, 29, 12, 59, 59],
    [2030,  7,  4, 17, 07, 06],
 # The following test fails on a surprising number of systems
@@ -31,10 +32,26 @@ my @time =
 #  [2038,  1, 17, 23, 59, 59],     # last full day in any tz
   );
 
+
+my @bad_time =
+    (
+     # month too large
+     [1995, 13, 01, 01, 01, 01],
+     # day too large
+     [1995, 02, 30, 01, 01, 01],
+     # hour too large
+     [1995, 02, 10, 25, 01, 01],
+     # minute too large
+     [1995, 02, 10, 01, 60, 01],
+     # second too large
+     [1995, 02, 10, 01, 01, 60],
+    );
+
 # use vmsish 'time' makes for oddness around the Unix epoch
 if ($^O eq 'VMS') { $time[0][2]++ }
 
 my $tests = (@time * 12) + 6;
+$tests += @bad_time;
 $tests += 2 if $ENV{PERL_CORE};
 $tests += 5 if $ENV{MAINTAINER};
 
@@ -74,6 +91,16 @@ for (@time) {
         ok($M, $mon, 'month');
         ok($Y, $year, 'year');
     }
+}
+
+for (@bad_time) {
+    my($year, $mon, $mday, $hour, $min, $sec) = @$_;
+    $year -= 1900;
+    $mon--;
+
+    eval { timegm($sec,$min,$hour,$mday,$mon,$year) };
+
+    ok($@, qr/.*out of range.*/, 'invalid time caused an error');
 }
 
 ok(timelocal(0,0,1,1,0,90) - timelocal(0,0,0,1,0,90), 3600,
