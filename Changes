@@ -1,3 +1,14 @@
+1.07_93  2003-07-23
+
+- Henrik's code explicitly didn't work with negative epoch values,
+which is not good.  Now we assume that they are allowed, except on
+MacOS, which is known to use an unsigned int for time_t.
+
+- Document that dates before the epoch should work on systems which
+support negative epoch values, but that we can't test them because we
+don't know _which_ systems support this.
+
+
 1.07_92  2003-07-23
 
 - Removed tests which relied on the zoneinfo database to be up to date
