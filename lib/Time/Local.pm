@@ -256,8 +256,10 @@ The proclivity to croak() is probably a bug.
 =head1 AUTHOR
 
 This module is based on a Perl 4 library, timelocal.pl, that was
-included with Perl 4.036, and perhaps earlier versions.
-Unfortunately, I cannot find any attribution for this code anywhere.
+included with Perl 4.036, and was most likely written by Tom
+Christiansen.
+
+The current version was written by Graham Barr.
 
 It is now being maintained separately from the Perl core by Dave
 Rolsky, <autarch@urth.org>.
