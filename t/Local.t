@@ -32,7 +32,6 @@ my @time =
 #  [2038,  1, 17, 23, 59, 59],     # last full day in any tz
   );
 
-
 my @bad_time =
     (
      # month too large
@@ -47,49 +46,66 @@ my @bad_time =
      [1995, 02, 10, 01, 01, 60],
     );
 
+my @neg_time =
+    (
+     # test negative epochs for systems that handle it
+     [ 1969, 12, 31, 16, 59, 59 ],
+     [ 1950, 04, 12, 9, 30, 31 ],
+    );
+
+my $neg_time_ok = defined ((localtime(-3600))[0]) ? 1 : 0;
+
 # use vmsish 'time' makes for oddness around the Unix epoch
 if ($^O eq 'VMS') { $time[0][2]++ }
 
-my $tests = (@time * 12) + 8;
+my $tests = (@time * 12);
+$tests += @neg_time * 12;
 $tests += @bad_time;
+$tests += 8;
 $tests += 2 if $ENV{PERL_CORE};
 $tests += 5 if $ENV{MAINTAINER};
 
 plan tests => $tests;
 
-for (@time) {
+for (@time, @neg_time) {
     my($year, $mon, $mday, $hour, $min, $sec) = @$_;
     $year -= 1900;
     $mon--;
 
     if ($^O eq 'vos' && $year == 70) {
         skip(1, "skipping 1970 test on VOS.\n") for 1..6;
+    } elsif ($year < 70 && ! $neg_time_ok) {
+        skip(1, "skipping negative epoch.\n") for 1..6;
     } else {
-        my $time = timelocal($sec,$min,$hour,$mday,$mon,$year);
+        my $year_in = $year < 70 ? $year + 1900 : $year;
+        my $time = timelocal($sec,$min,$hour,$mday,$mon,$year_in);
 
         my($s,$m,$h,$D,$M,$Y) = localtime($time);
 
-        ok($s, $sec, 'second');
-        ok($m, $min, 'minute');
-        ok($h, $hour, 'hour');
-        ok($D, $mday, 'day');
-        ok($M, $mon, 'month');
-        ok($Y, $year, 'year');
+        ok($s, $sec, 'timelocal second');
+        ok($m, $min, 'timelocal minute');
+        ok($h, $hour, 'timelocal hour');
+        ok($D, $mday, 'timelocal day');
+        ok($M, $mon, 'timelocal month');
+        ok($Y, $year, 'timelocal year');
     }
 
     if ($^O eq 'vos' && $year == 70) {
         skip(1, "skipping 1970 test on VOS.\n") for 1..6;
+    } elsif ($year < 70 && ! $neg_time_ok) {
+        skip(1, "skipping negative epoch.\n") for 1..6;
     } else {
-        my $time = timegm($sec,$min,$hour,$mday,$mon,$year);
+        my $year_in = $year < 70 ? $year + 1900 : $year;
+        my $time = timegm($sec,$min,$hour,$mday,$mon,$year_in);
 
         my($s,$m,$h,$D,$M,$Y) = gmtime($time);
 
-        ok($s, $sec, 'second');
-        ok($m, $min, 'minute');
-        ok($h, $hour, 'hour');
-        ok($D, $mday, 'day');
-        ok($M, $mon, 'month');
-        ok($Y, $year, 'year');
+        ok($s, $sec, 'timegm second');
+        ok($m, $min, 'timegm minute');
+        ok($h, $hour, 'timegm hour');
+        ok($D, $mday, 'timegm day');
+        ok($M, $mon, 'timegm month');
+        ok($Y, $year, 'timegm year');
     }
 }
 
@@ -141,7 +157,6 @@ if ($^O eq "aix" && $Config{osvers} =~ m/^4\.3\./) {
     ok(sprintf('%x', timelocal(localtime(0x7fffffff))), sprintf('%x', 0x7fffffff),
        '0x7fffffff round trip through localtime then timelocal');
 }
-
 
 if ($ENV{MAINTAINER}) {
     eval { require POSIX; POSIX::tzset() };
