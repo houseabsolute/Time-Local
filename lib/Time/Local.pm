@@ -32,7 +32,7 @@ if ($^O eq 'MacOS') {
     $MinInt = 0;
 } else {
     $MaxInt = ((1 << (8 * $Config{intsize} - 2))-1)*2 + 1;
-    $MinInt = 0; # Or -$MaxInt-1 if negative is OK...
+    $MinInt = -$MaxInt - 1;
 }
 
 $Max{Day} = ($MaxInt >> 1) / 43200;
@@ -105,7 +105,7 @@ sub timegm {
     unless ($Options{no_range_check}) {
 	if (abs($year) >= 0x7fff) {
 	    $year += 1900;
-	    croak "Cannot handle date ($sec, $min, $hour, $mday, $month, $year)";
+	    croak "Cannot handle date ($sec, $min, $hour, $mday, $month, *$year*)";
 	}
 
 	croak "Month '$month' out of range 0..11" if $month > 11 or $month < 0;
@@ -126,6 +126,10 @@ sub timegm {
         or  ($days > $Min{Day} or $days == $Min{Day} and $xsec >= $Min{Sec})
        and  ($days < $Max{Day} or $days == $Max{Day} and $xsec <= $Max{Sec}))
     {
+        warn "Day too small - $days > $Min{Day}\n" if $days < $Min{Day};
+        warn "Day too big - $days > $Max{Day}\n" if $days > $Max{Day};
+        warn "Sec too small - $days < $Min{Sec}\n" if $days < $Min{Sec};
+        warn "Sec too big - $days > $Max{Sec}\n" if $days > $Max{Sec};
 	$year += 1900;
 	croak "Cannot handle date ($sec, $min, $hour, $mday, $month, $year)";
     }
