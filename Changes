@@ -1,4 +1,20 @@
-1.07_90
+1.07_91  2003-07-22
+
+- Henrik refined his edge case fix to work on Win32, which apparently
+dislikes large negative signed ints.  Tests now pass on Win32.  More
+testing on other platforms is appreciated.
+
+- Documented Time::Local's behavior when timelocal is called with an
+ambiguous local time.  Some local times occur twice on the same day
+because a DST change causes the clock to move backwards one earlier.
+See "Ambiguous Local Times" in the docs for more details.
+
+- Removed the statement under "BUGS" that the proclivity to croak() is
+probably a bug.  It's not a bug, and it sure isn't going to change at
+this point in time, anyway!
+
+
+1.07_90  2003-07-15
 
 - Fixed behavior for edge cases like timegm(gmtime(0x7FFF_FFFF)),
 which should work even on platforms where time_t is signed.  Patch
