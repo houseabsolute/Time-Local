@@ -159,8 +159,9 @@ Time::Local - efficiently compute time from local and GMT time
 
 These routines are the inverse of built-in perl functions localtime()
 and gmtime().  They accept a date as a six-element array, and return
-the corresponding time(2) value in seconds since the Unix epoch (Midnight,
-January 1, 1970 UTC).  This value can be positive or negative.
+the corresponding time(2) value in seconds since the system epoch (Midnight,
+January 1, 1970 UTC on Unix, for example).  This value can be positive or
+negative.
 
 It is worth drawing particular attention to the expected ranges for
 the values provided.  The value for the day of the month is the actual day
