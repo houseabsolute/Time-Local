@@ -123,7 +123,7 @@ else
 
     # Same local time in America/Chicago.  There is transition here as
     # well.
-    my $time = timelocal(0, 30, 1, 28, 9, 101);
+    $time = timelocal(0, 30, 1, 28, 9, 101);
     ok($time, 1004250600,
        'timelocal prefers earlier epoch in the presence of a DST change');
 
@@ -133,7 +133,7 @@ else
     # 2001-03-25 02:30:00 in Australia/Sydney.  This is the transition
     # _to_ summer time.  The southern hemisphere transitions are
     # opposite those of the northern.
-    my $time = timelocal(0, 30, 2, 25, 2, 101);
+    $time = timelocal(0, 30, 2, 25, 2, 101);
     ok($time, 985447800,
        'timelocal prefers earlier epoch in the presence of a DST change');
 }
