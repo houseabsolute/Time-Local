@@ -33,6 +33,11 @@ if ($^O eq 'MacOS') {
 } else {
     $MaxInt = ((1 << (8 * $Config{intsize} - 2))-1)*2 + 1;
     $MinInt = -$MaxInt - 1;
+
+    # On Win32 (and others?) time_t appears to be signed, but negative
+    # epochs still don't work. - XXX - this is experimental
+    $MinInt = 0
+        unless defined ( (localtime(-1))[0] );
 }
 
 $Max{Day} = ($MaxInt >> 1) / 43200;
@@ -111,6 +116,8 @@ sub timegm {
 	croak "Month '$month' out of range 0..11" if $month > 11 or $month < 0;
 
 	my $md = $MonthDays[$month];
+#        ++$md if $month == 1 and $year % 4 == 0 and
+#            ($year % 100 != 0 or ($year + 1900) % 400 == 0);
 	++$md unless $month != 1 or $year % 4 or !($year % 400);
 
 	croak "Day '$mday' out of range 1..$md"   if $mday  > $md  or $mday  < 1;
