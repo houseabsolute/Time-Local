@@ -1,0 +1,17 @@
+1.05
+
+This version is nearly identical to version 1.04, which is included in
+the Perl core, but it removes the use of "our" in order to make the
+code backwards compatible with Perl 5.00503.  It probably works with
+earlier versions of Perl as well, but I don't have anything earlier
+than 5.00503 installed.
+
+Changes made from the core version include:
+
+- Packaged for distribution on CPAN.
+
+- Added an AUTHOR section to the docs.
+
+- Clarified some points in the docs, particularly the fact that this
+module uses the Unix epoch, regardless of platform.
+
