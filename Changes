@@ -1,3 +1,9 @@
+1.09    2004-04-07
+
+- Fixed a bug in the test suite that led to timegm not getting tested
+properly, and timelocal getting tested twice for the same values.
+
+
 1.08    2004-04-07
 
 - Changed occurences of "UTC" to "GMT" in order to agree with POSIX,
