@@ -3,7 +3,8 @@
 - Try to make detection of supported epoch range a little smarter.
 The detection was allowing negative epochs on Win32 but apparently
 this doesn't work, and trying to pass a pre-epoch date in just causes
-a lot of warnings.
+a lot of warnings.  This silences warnings during the tests on
+windows.
 
 
 1.10    2004-04-20
