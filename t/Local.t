@@ -151,6 +151,8 @@ if ($ENV{MAINTAINER}) {
 if ($ENV{PERL_CORE}) {
   package test;
   require 'timelocal.pl';
+
+  # need to get ok() from main package
   ::ok(timegm(0,0,0,1,0,80), main::timegm(0,0,0,1,0,80),
      'timegm in timelocal.pl');
 
