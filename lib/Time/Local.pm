@@ -264,6 +264,14 @@ The whole scheme for interpreting two-digit years can be considered a bug.
 
 The proclivity to croak() is probably a bug.
 
+=head1 SUPPORT
+
+Support for this module is provided via the perl5-porters@perl.org
+email list.  See http://lists.perl.org/ for more details.
+
+Please submit bugs using the RT system at bugs.perl.org, the perlbug
+script, or as a last resort, to the perl5-porters@perl.org list.
+
 =head1 AUTHOR
 
 This module is based on a Perl 4 library, timelocal.pl, that was
