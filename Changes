@@ -1,3 +1,10 @@
+1.10    2004-04-20
+
+- Fix compilation failure with older Test.pm (including the versions
+shipped with 5.6.1 and earlier perls).  Ticket #6079 on rt.cpan.org.
+Patch by somebody who didn't give their name on rt.cpan.org ;)
+
+
 1.09    2004-04-07
 
 - Fixed a bug in the test suite that led to timegm not getting tested
