@@ -7,7 +7,7 @@ use strict;
 use integer;
 
 use vars qw( $VERSION @ISA @EXPORT @EXPORT_OK );
-$VERSION    = '1.07_93';
+$VERSION    = '1.07_94';
 $VERSION    = eval $VERSION;
 @ISA	= qw( Exporter );
 @EXPORT	= qw( timegm timelocal );
@@ -85,8 +85,8 @@ sub _zoneadjust {
     my ($day, $sec, $time) = @_;
 
     $sec = $sec + _timegm(localtime($time)) - $time;
-    if ($sec > 86400) { $day++; $sec -= 86400; }
-    if ($sec < 0)     { $day--; $sec += 86400; }
+    if ($sec >= 86400) { $day++; $sec -= 86400; }
+    if ($sec <  0)     { $day--; $sec += 86400; }
 
     ($day, $sec);
 }
@@ -160,6 +160,10 @@ sub timelocal {
     my $zone_off = $ref_t - $loc_t
 	or return $loc_t;
 
+    # This hack is needed to always pick the first matching time
+    # during a DST change when time would otherwise be ambiguous
+    $zone_off -= 3600 if ($delta > 0 && $ref_t >= 3600);
+
     # Adjust for timezone
     $loc_t = $ref_t + $zone_off;
 
@@ -170,11 +174,11 @@ sub timelocal {
     # Adjust for DST change
     $loc_t += $dst_off;
 
+    return $loc_t if $dst_off >= 0;
+
     # for a negative offset from GMT, and if the original date
     # was a non-extent gap in a forward DST jump, we should
     # now have the wrong answer - undo the DST adjust;
-
-    return $loc_t if $zone_off <= 0;
 
     my ($s,$m,$h) = localtime($loc_t);
     $loc_t -= $dst_off if $s != $_[0] || $m != $_[1] || $h != $_[2];
