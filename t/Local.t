@@ -33,7 +33,7 @@ my @time =
 # use vmsish 'time' makes for oddness around the Unix epoch
 if ($^O eq 'VMS') { $time[0][2]++ }
 
-my $tests = (@time * 12) + 6;
+my $tests = (@time * 12) + 46;
 $tests += 2 if $ENV{PERL_CORE};
 
 plan tests => $tests;
@@ -98,10 +98,33 @@ ok(timegm(0,0,0, 1, 2, 80) - timegm(0,0,0, 1, 0, 80), 60 * 24 * 3600,
 
 # round trip was broken for edge cases
 ok(sprintf('%x', timegm(gmtime(0x7fffffff))), sprintf('%x', 0x7fffffff),
-   '0x7fffffff round trip throgh gmtime then timegm');
+   '0x7fffffff round trip through gmtime then timegm');
 
 ok(sprintf('%x', timelocal(localtime(0x7fffffff))), sprintf('%x', 0x7fffffff),
-   '0x7fffffff round trip throgh localtime then timelocal');
+   '0x7fffffff round trip through localtime then timelocal');
+
+{
+    local $ENV{TZ} = 'Europe/Vienna';
+    eval { require POSIX; POSIX::tzset() };
+
+    if ($@) {
+        skip(1, "cannot set time zone to Europe/Vienna") for 1..10;
+    } else {
+        my $time = 1004220198;
+        for (1..20)
+        {
+            my $result = timelocal(localtime($time));
+            ok($time, $result,
+               "round trip via localtime -> timelocal should always work ($time)");
+
+            $result = timegm(gmtime($time));
+            ok($time, $result,
+               "round trip via gmtime -> timegm should always work ($time)");
+
+            $time += 300;
+        }
+    }
+}
 
 if ($ENV{PERL_CORE}) {
   package test;
