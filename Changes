@@ -3,6 +3,11 @@
 - Explicitly turn off negative epoch testing on VMS.  Change #24310
 from bleadperl, Craig Berry.
 
+- In the test suite when checking on whether negative epochs are
+allowed, use 3 days before the epoch as a test, because just one hour
+before may give false positives (for example on Win32 with the Borland
+compiler).
+
 
 1.11    2005-02-09
 
