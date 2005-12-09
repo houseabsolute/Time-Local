@@ -165,7 +165,6 @@ sub timelocal {
     # Calculate first guess with a one-day delta to avoid localtime overflow
     my $delta = ($_[5] < 100)? ONE_DAY : -1 * ONE_DAY;
     my $loc_t = _timegm(localtime( $ref_t + $delta )) - $delta;
-    $loc_t -=
 
     # Is there a timezone offset from GMT or are we done
     my $zone_off = $ref_t - $loc_t
