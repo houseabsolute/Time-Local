@@ -8,6 +8,11 @@ allowed, use 3 days before the epoch as a test, because just one hour
 before may give false positives (for example on Win32 with the Borland
 compiler).
 
+- Reverted an earlier change that slightly extended the range of
+values for which timelocal worked (by about a day in either direction)
+because it could cause an incorrect answer for certain epoch values on
+the date of a DST change.  Reported by Gisle Aas.
+
 
 1.11    2005-02-09
 
