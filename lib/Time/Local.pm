@@ -162,9 +162,7 @@ sub timelocal {
     local ($Min{Day}, $Min{Sec}) = _zoneadjust($Min{Day}, $Min{Sec}, $MinInt);
     my $ref_t = &timegm;
 
-    # Calculate first guess with a one-day delta to avoid localtime overflow
-    my $delta = ($_[5] < 100)? ONE_DAY : -1 * ONE_DAY;
-    my $loc_t = _timegm(localtime( $ref_t + $delta )) - $delta;
+    my $loc_t = _timegm(localtime($ref_t));
 
     # Is there a timezone offset from GMT or are we done
     my $zone_off = $ref_t - $loc_t
@@ -172,7 +170,7 @@ sub timelocal {
 
     # This hack is needed to always pick the first matching time
     # during a DST change when time would otherwise be ambiguous
-    $zone_off -= ONE_HOUR if ($delta > 0 && $ref_t >= ONE_HOUR);
+    $zone_off -= ONE_HOUR if $ref_t >= ONE_HOUR;
 
     # Adjust for timezone
     $loc_t = $ref_t + $zone_off;
@@ -189,7 +187,6 @@ sub timelocal {
     # for a negative offset from GMT, and if the original date
     # was a non-extent gap in a forward DST jump, we should
     # now have the wrong answer - undo the DST adjust;
-
     my ($s,$m,$h) = localtime($loc_t);
     $loc_t -= $dst_off if $s != $_[0] || $m != $_[1] || $h != $_[2];
 
