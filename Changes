@@ -1,4 +1,4 @@
-1.12
+1.12    2005-12-18
 
 - Explicitly turn off negative epoch testing on VMS.  Change #24310
 from bleadperl, Craig Berry.
