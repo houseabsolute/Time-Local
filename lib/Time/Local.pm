@@ -205,9 +205,10 @@ positive values, so dates before the system's epoch may not work on
 all operating systems.
 
 It is worth drawing particular attention to the expected ranges for
-the values provided.  The value for the day of the month is the actual day
-(ie 1..31), while the month is the number of months since January (0..11).
-This is consistent with the values returned from localtime() and gmtime().
+the values provided.  The value for the day of the month is the actual
+day (ie 1..31), while the month is the number of months since January
+(0..11).  This is consistent with the values returned from localtime()
+and gmtime().
 
 The timelocal() and timegm() functions perform range checking on the
 input $sec, $min, $hour, $mday, and $mon values by default.  If you
@@ -243,24 +244,25 @@ so that 112 indicates 2012.  This rule also applies to years less than zero
 =item *
 
 Years in the range 0..99 are interpreted as shorthand for years in the
-rolling "current century," defined as 50 years on either side of the current
-year.  Thus, today, in 1999, 0 would refer to 2000, and 45 to 2045,
-but 55 would refer to 1955.  Twenty years from now, 55 would instead refer
-to 2055.  This is messy, but matches the way people currently think about
-two digit dates.  Whenever possible, use an absolute four digit year instead.
+rolling "current century," defined as 50 years on either side of the
+current year.  Thus, today, in 1999, 0 would refer to 2000, and 45 to
+2045, but 55 would refer to 1955.  Twenty years from now, 55 would
+instead refer to 2055.  This is messy, but matches the way people
+currently think about two digit dates.  Whenever possible, use an
+absolute four digit year instead.
 
 =back
 
-The scheme above allows interpretation of a wide range of dates, particularly
-if 4-digit years are used.
+The scheme above allows interpretation of a wide range of dates,
+particularly if 4-digit years are used.
 
 Please note, however, that the range of dates that can be actually be
 handled depends on the size of an integer (time_t) on a given
 platform. Currently, this is 32 bits for most systems, yielding an
 approximate range from Dec 1901 to Jan 2038.
 
-Both timelocal() and timegm() croak if given dates outside the supported
-range.
+Both timelocal() and timegm() croak if given dates outside the
+supported range.
 
 =head2 Ambiguous Local Times (DST)
 
@@ -297,28 +299,29 @@ minimum value of time_t for the system.
 
 =head1 IMPLEMENTATION
 
-These routines are quite efficient and yet are always guaranteed to agree
-with localtime() and gmtime().  We manage this by caching the start times
-of any months we've seen before.  If we know the start time of the month,
-we can always calculate any time within the month.  The start times
-are calculated using a mathematical formula. Unlike other algorithms
-that do multiple calls to gmtime().
+These routines are quite efficient and yet are always guaranteed to
+agree with localtime() and gmtime().  We manage this by caching the
+start times of any months we've seen before.  If we know the start
+time of the month, we can always calculate any time within the month.
+The start times are calculated using a mathematical formula. Unlike
+other algorithms that do multiple calls to gmtime().
 
-timelocal() is implemented using the same cache.  We just assume that we're
-translating a GMT time, and then fudge it when we're done for the timezone
-and daylight savings arguments.  Note that the timezone is evaluated for
-each date because countries occasionally change their official timezones.
-Assuming that localtime() corrects for these changes, this routine will
-also be correct.
+timelocal() is implemented using the same cache.  We just assume that
+we're translating a GMT time, and then fudge it when we're done for
+the timezone and daylight savings arguments.  Note that the timezone
+is evaluated for each date because countries occasionally change their
+official timezones.  Assuming that localtime() corrects for these
+changes, this routine will also be correct.
 
 =head1 BUGS
 
-The whole scheme for interpreting two-digit years can be considered a bug.
+The whole scheme for interpreting two-digit years can be considered a
+bug.
 
 =head1 SUPPORT
 
-Support for this module is provided via the datetime@perl.org
-email list.  See http://lists.perl.org/ for more details.
+Support for this module is provided via the datetime@perl.org email
+list.  See http://lists.perl.org/ for more details.
 
 Please submit bugs using the RT system at rt.cpan.org, or as a last
 resort, to the datetime@perl.org list.
