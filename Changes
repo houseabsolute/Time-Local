@@ -1,3 +1,14 @@
+1.12_01 2006-03-31
+
+- Reverted changes from 1.07_90 that attempted to extend range of
+allowable epoch values around edge cases. It turns out that this was
+causing integer overflows 
+
+- In one error case, the module could warn and then croak. I changed
+it to simply croak with the whole message. Based on a patch by Michael
+Schwern from rt.perl.org #36268.
+
+
 1.12    2005-12-18
 
 - Explicitly turn off negative epoch testing on VMS.  Change #24310

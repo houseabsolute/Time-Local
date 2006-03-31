@@ -7,7 +7,7 @@ use strict;
 use integer;
 
 use vars qw( $VERSION @ISA @EXPORT @EXPORT_OK );
-$VERSION   = '1.12';
+$VERSION   = '1.12_01';
 $VERSION   = eval $VERSION;
 @ISA       = qw( Exporter );
 @EXPORT    = qw( timegm timelocal );
@@ -23,48 +23,36 @@ $NextCentury += 100 if $Breakpoint < 50;
 my $Century = $NextCentury - 100;
 my $SecOff  = 0;
 
-my ( %Options, %Cheat, %Min, %Max );
-my ( $MinInt, $MaxInt );
+my ( %Options, %Cheat );
 
 use constant SECS_PER_MINUTE => 60;
 use constant SECS_PER_HOUR   => 3600;
 use constant SECS_PER_DAY    => 86400;
 
+my $MaxInt = ( ( 1 << ( 8 * $Config{intsize} - 2 ) ) -1 ) * 2 + 1;
+my $MaxDay = int( ( $MaxInt - ( SECS_PER_DAY / 2 ) ) / SECS_PER_DAY ) - 1;
+
 if ( $^O eq 'MacOS' ) {
     # time_t is unsigned...
     $MaxInt = ( 1 << ( 8 * $Config{intsize} ) ) - 1;
-    $MinInt = 0;
 }
 else {
     $MaxInt = ( ( 1 << ( 8 * $Config{intsize} - 2 ) ) - 1 ) * 2 + 1;
-    $MinInt = -$MaxInt - 1;
-
-    # On Win32 (and others?) time_t appears to be signed, but negative
-    # epochs still don't work. - XXX - this is experimental
-    $MinInt = 0
-        unless defined( ( localtime(-1) )[0] );
 }
-
-$Max{Day} = ( $MaxInt >> 1 ) / 43200;
-$Min{Day} = $MinInt ? -( $Max{Day} + 1 ) : 0;
-
-$Max{Sec} = $MaxInt - SECS_PER_DAY * $Max{Day};
-$Min{Sec} = $MinInt - SECS_PER_DAY * $Min{Day};
 
 # Determine the EPOC day for this machine
 my $Epoc = 0;
 if ( $^O eq 'vos' ) {
     # work around posix-977 -- VOS doesn't handle dates in the range
     # 1970-1980.
-    $Epoc = _daygm( ( 0, 0, 0, 1, 0, 70, 4, 0 ) );
+    $Epoc = _daygm( 0, 0, 0, 1, 0, 70, 4, 0 );
 }
 elsif ( $^O eq 'MacOS' ) {
-    no integer;
-
-    # MacOS time() is seconds since 1 Jan 1904, localtime so we need
-    # to calculate an offset to apply later
-    $Epoc   = 693901;
-    $SecOff = timelocal( localtime(0) ) - timelocal( gmtime(0) );
+    $MaxDay *=2 if $^O eq 'MacOS';  # time_t unsigned ... quick hack?
+    # MacOS time() is seconds since 1 Jan 1904, localtime
+    # so we need to calculate an offset to apply later
+    $Epoc = 693901;
+    $SecOff = timelocal( localtime(0)) - timelocal( gmtime(0) ) ;
     $Epoc += _daygm( gmtime(0) );
 }
 else {
@@ -97,27 +85,7 @@ sub _timegm {
     my $sec =
         $SecOff + $_[0] + ( SECS_PER_MINUTE * $_[1] ) + ( SECS_PER_HOUR * $_[2] );
 
-    no integer;
-
     return $sec + ( SECS_PER_DAY * &_daygm );
-}
-
-sub _zoneadjust {
-    my ( $day, $sec, $time ) = @_;
-
-    $sec += _timegm( localtime($time) ) - $time;
-
-    if ( $sec >= SECS_PER_DAY ) {
-        $day++;
-        $sec -= SECS_PER_DAY;
-    }
-
-    if ( $sec < 0 ) {
-        $day--;
-        $sec += SECS_PER_DAY;
-    }
-
-    return ( $day, $sec );
 }
 
 sub timegm {
@@ -141,10 +109,7 @@ sub timegm {
             if $month > 11
             or $month < 0;
 
-        my $md = $MonthDays[$month];
-
-        #        ++$md if $month == 1 and $year % 4 == 0 and
-        #            ($year % 100 != 0 or ($year + 1900) % 400 == 0);
+	my $md = $MonthDays[$month];
         ++$md
             unless $month != 1 or $year % 4 or !( $year % 400 );
 
@@ -155,25 +120,22 @@ sub timegm {
     }
 
     my $days = _daygm( undef, undef, undef, $mday, $month, $year );
-    my $xsec =
-        $sec + $SecOff + ( SECS_PER_MINUTE * $min ) + ( SECS_PER_HOUR * $hour );
 
-    unless ( $Options{no_range_check}
-        or ( $days > $Min{Day}  or $days == $Min{Day} and $xsec >= $Min{Sec} )
-        and ( $days < $Max{Day} or $days == $Max{Day} and $xsec <= $Max{Sec} )
-        ) {
+    unless ($Options{no_range_check} or abs($days) < $MaxDay) {
+        my $msg = '';
+        $msg .= "Day too big - $days > $MaxDay\n" if $days > $MaxDay;
 
-        warn "Day too small - $days > $Min{Day}\n" if $days < $Min{Day};
-        warn "Day too big - $days > $Max{Day}\n"   if $days > $Max{Day};
-        warn "Sec too small - $days < $Min{Sec}\n" if $days < $Min{Sec};
-        warn "Sec too big - $days > $Max{Sec}\n"   if $days > $Max{Sec};
-        $year += 1900;
-        croak "Cannot handle date ($sec, $min, $hour, $mday, $month, $year)";
+	$year += 1900;
+        $msg .=  "Cannot handle date ($sec, $min, $hour, $mday, $month, $year)";
+
+	croak $msg;
     }
 
-    no integer;
-
-    return $xsec + ( SECS_PER_DAY * $days );
+    return $sec
+           + $SecOff
+           + ( SECS_PER_MINUTE * $min )
+           + ( SECS_PER_HOUR * $hour )
+           + ( SECS_PER_DAY * $days );
 }
 
 sub timegm_nocheck {
@@ -182,14 +144,6 @@ sub timegm_nocheck {
 }
 
 sub timelocal {
-
-    # Adjust Max/Min allowed times to fit local time zone and call timegm
-    local ( $Max{Day}, $Max{Sec} )
-        = _zoneadjust( $Max{Day}, $Max{Sec}, $MaxInt );
-
-    local ( $Min{Day}, $Min{Sec} )
-        = _zoneadjust( $Min{Day}, $Min{Sec}, $MinInt );
-
     my $ref_t = &timegm;
     my $loc_t = _timegm( localtime($ref_t) );
 
@@ -256,31 +210,21 @@ the values provided.  The value for the day of the month is the actual day
 This is consistent with the values returned from localtime() and gmtime().
 
 The timelocal() and timegm() functions perform range checking on the
-input $sec, $min, $hour, $mday, and $mon values by default.  If you'd
-rather they didn't, you can explicitly import the timelocal_nocheck()
-and timegm_nocheck() functions.
+input $sec, $min, $hour, $mday, and $mon values by default.  If you
+are confident that your data is good, you can explicitly import the
+timelocal_nocheck() and timegm_nocheck() functions, which may provide
+a small performance improvement.
 
-	use Time::Local 'timelocal_nocheck';
+    use Time::Local 'timelocal_nocheck';
 
-	{
-	    # The 365th day of 1999
-	    print scalar localtime timelocal_nocheck 0,0,0,365,0,99;
+    # The 365th day of 1999
+    print scalar localtime timelocal_nocheck 0,0,0,365,0,99;
 
-	    # The twenty thousandth day since 1970
-	    print scalar localtime timelocal_nocheck 0,0,0,20000,0,70;
-
-	    # And even the 10,000,000th second since 1999!
-	    print scalar localtime timelocal_nocheck 10000000,0,0,1,0,99;
-	}
-
-Your mileage may vary when trying these with minutes and hours,
-and it doesn't work at all for months.
-
-Strictly speaking, the year should also be specified in a form consistent
-with localtime(), i.e. the offset from 1900.
-In order to make the interpretation of the year easier for humans,
-however, who are more accustomed to seeing years as two-digit or four-digit
-values, the following conventions are followed:
+Strictly speaking, the year should also be specified in a form
+consistent with localtime(), i.e. the offset from 1900.  In order to
+make the interpretation of the year easier for humans, however, who
+are more accustomed to seeing years as two-digit or four-digit values,
+the following conventions are followed:
 
 =over 4
 
@@ -308,12 +252,12 @@ two digit dates.  Whenever possible, use an absolute four digit year instead.
 =back
 
 The scheme above allows interpretation of a wide range of dates, particularly
-if 4-digit years are used.  
+if 4-digit years are used.
 
-Please note, however, that the range of dates that can be actually be handled
-depends on the size of an integer (time_t) on a given platform.  
-Currently, this is 32 bits for most systems, yielding an approximate range 
-from Dec 1901 to Jan 2038.
+Please note, however, that the range of dates that can be actually be
+handled depends on the size of an integer (time_t) on a given
+platform. Currently, this is 32 bits for most systems, yielding an
+approximate range from Dec 1901 to Jan 2038.
 
 Both timelocal() and timegm() croak if given dates outside the supported
 range.
