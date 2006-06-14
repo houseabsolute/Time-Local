@@ -8,6 +8,12 @@ causing integer overflows
 it to simply croak with the whole message. Based on a patch by Michael
 Schwern from rt.perl.org #36268.
 
+- Removed the code from the docs that implied that the *_nocheck
+variants were created for doing date math. They're just for speeding
+things up when you have known valid data. If you pass them invalid
+data, you'll probably get an incorrect answer. See #31421 on
+rt.perl.org for discussion.
+
 
 1.12    2005-12-18
 
