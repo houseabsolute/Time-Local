@@ -68,7 +68,7 @@ $tests += @neg_time * 12;
 $tests += @bad_time;
 $tests += 6;
 $tests += 2 if $ENV{PERL_CORE};
-$tests += 7 if $ENV{MAINTAINER};
+$tests += 8 if $ENV{MAINTAINER};
 
 plan tests => $tests;
 

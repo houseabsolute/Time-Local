@@ -145,31 +145,33 @@ sub timegm_nocheck {
 
 sub timelocal {
     my $ref_t = &timegm;
-    my $loc_t = _timegm( localtime($ref_t) );
+    my $loc_for_ref_t = _timegm( localtime($ref_t) );
 
-    # Is there a timezone offset from GMT or are we done?
-    my $zone_off = $ref_t - $loc_t
-        or return $loc_t;
-
-    # This hack is needed to always pick the first matching time
-    # during a DST change when time would otherwise be ambiguous
-    $zone_off -= SECS_PER_HOUR if $ref_t >= SECS_PER_HOUR;
+    my $zone_off = $loc_for_ref_t - $ref_t
+        or return $loc_for_ref_t;
 
     # Adjust for timezone
-    $loc_t = $ref_t + $zone_off;
+    my $loc_t = $ref_t - $zone_off;
 
     # Are we close to a DST change or are we done
-    my $dst_off = $ref_t - _timegm( localtime($loc_t) )
-        or return $loc_t;
+    my $dst_off = $ref_t - _timegm( localtime($loc_t) );
+
+    # If this evaluates to true, it means that the value in $loc_t is
+    # the _second_ hour after a DST change where the local time moves
+    # backward.
+    if ( ! $dst_off &&
+         ( ( $ref_t - SECS_PER_HOUR ) - _timegm( localtime( $loc_t - SECS_PER_HOUR ) ) < 0 )
+       ) {
+        return $loc_t - SECS_PER_HOUR;
+    }
 
     # Adjust for DST change
     $loc_t += $dst_off;
 
-    return $loc_t if $dst_off >= 0;
+    return $loc_t if $dst_off > 0;
 
-    # for a negative offset from GMT, and if the original date
-    # was a non-extent gap in a forward DST jump, we should
-    # now have the wrong answer - undo the DST adjust;
+    # If the original date was a non-extent gap in a forward DST jump,
+    # we should now have the wrong answer - undo the DST adjustment
     my ( $s, $m, $h ) = localtime($loc_t);
     $loc_t -= $dst_off if $s != $_[0] || $m != $_[1] || $h != $_[2];
 
