@@ -105,9 +105,9 @@ testing on other platforms is appreciated.
 
 - Documented Time::Local's behavior when timelocal is called with an
 ambiguous local time.  Some local times occur twice on the same day
-because a DST change causes the clock to move backwards one earlier.
-See "Ambiguous Local Times" in the docs for more details.  Closes
-perlbug 7822.
+because a DST change causes the clock to move backwards one hour
+earlier.  See "Ambiguous Local Times" in the docs for more details.
+Closes perlbug 7822.
 
 - Removed the statement under "BUGS" that the proclivity to croak() is
 probably a bug.  It's not a bug, and it sure isn't going to change at
