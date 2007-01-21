@@ -2,9 +2,7 @@ Changes
 lib/Time/Local.pm
 LICENSE
 Makefile.PL
-MANIFEST
+MANIFEST			This list of files
 MANIFEST.SKIP
-META.yml			Module meta-data in YAML
 README
 t/Local.t
-
