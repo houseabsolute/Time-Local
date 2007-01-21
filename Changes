@@ -1,3 +1,9 @@
+1.14    2007-01-21
+
+- Fixed leap year check to produce the right answer for years outside
+  of the 32-bit epoch range (such as 1900 and 2100). See rt.perl.org
+  #31241. Reported by Nathan Zook.
+
 1.13    2006-08-09
 
 - Switched to using Test::More for the tests.
