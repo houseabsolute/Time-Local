@@ -168,7 +168,7 @@ for my $p (@years) {
 
 SKIP:
 {
-    skip 'this platform does not support negative epochs.', 2
+    skip 'this platform does not support negative epochs.', 1
         unless $neg_epoch_ok;
 
     eval { timegm(0,0,0,29,1,1904) };

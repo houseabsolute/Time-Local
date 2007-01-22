@@ -1,3 +1,9 @@
+1.15    2007-01-22
+
+- Fix Local.t test count when running on a system that doesn't support
+  negative epochs (like Win32). Patched by Kenichi Ishigaki.
+
+
 1.14    2007-01-21
 
 - Fixed leap year check to produce the right answer for years outside

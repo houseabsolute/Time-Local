@@ -7,7 +7,7 @@ use strict;
 use integer;
 
 use vars qw( $VERSION @ISA @EXPORT @EXPORT_OK );
-$VERSION   = '1.14';
+$VERSION   = '1.15';
 
 @ISA       = qw( Exporter );
 @EXPORT    = qw( timegm timelocal );
