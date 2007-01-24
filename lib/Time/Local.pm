@@ -7,7 +7,7 @@ use strict;
 use integer;
 
 use vars qw( $VERSION @ISA @EXPORT @EXPORT_OK );
-$VERSION   = '1.15';
+$VERSION   = '1.16';
 
 @ISA       = qw( Exporter );
 @EXPORT    = qw( timegm timelocal );
@@ -111,7 +111,7 @@ sub timegm {
 
 	my $md = $MonthDays[$month];
         ++$md
-            if $month == 1 && _is_leap_year($year);
+            if $month == 1 && _is_leap_year( $year + 1900 );
 
         croak "Day '$mday' out of range 1..$md"  if $mday > $md or $mday < 1;
         croak "Hour '$hour' out of range 0..23"  if $hour > 23  or $hour < 0;

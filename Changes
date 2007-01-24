@@ -1,3 +1,9 @@
+1.16    2007-01-23
+
+- The leap year fix in 1.14 was pretty broken, as it checked after
+  converting the year to Perl's internal (year - 1900) format.
+
+
 1.15    2007-01-22
 
 - Fix Local.t test count when running on a system that doesn't support
