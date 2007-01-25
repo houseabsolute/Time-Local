@@ -1,3 +1,11 @@
+1.17    2007-01-25
+
+- I made the same test count mistake as was in 1.14 again. This
+  release fixes the test count (again) when running on a system that
+  doesn't support negative epochs (like Win32). Patched by Kenichi
+  Ishigaki (again).
+
+
 1.16    2007-01-23
 
 - The leap year fix in 1.14 was pretty broken, as it checked after
