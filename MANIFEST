@@ -6,3 +6,5 @@ MANIFEST			This list of files
 MANIFEST.SKIP
 README
 t/Local.t
+t/pod-coverage.t
+t/pod.t
