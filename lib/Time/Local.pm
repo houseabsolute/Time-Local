@@ -222,11 +222,15 @@ C<localtime()> and C<gmtime()>.
 
 =head1 FUNCTIONS
 
+=head2 C<timelocal()> and C<timegm()>
+
 This module exports two functions by default, C<timelocal()> and
 C<timegm()>.
 
 The C<timelocal()> and C<timegm()> functions perform range checking on
 the input $sec, $min, $hour, $mday, and $mon values by default.
+
+=head2 C<timelocal_nocheck()> and C<timegm_nocheck()>
 
 If you are working with data you know to be valid, you can speed your
 code up by using the "nocheck" variants, C<timelocal_nocheck()> and
