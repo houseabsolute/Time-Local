@@ -78,8 +78,8 @@ $tests += @neg_time * 12;
 $tests += @bad_time;
 $tests += @years;
 $tests += 10;
+$tests += 8;
 $tests += 2 if $ENV{PERL_CORE};
-$tests += 8 if $ENV{MAINTAINER};
 
 plan tests => $tests;
 
@@ -192,7 +192,11 @@ SKIP:
     is($@, '', 'no error with leap day of 1996 (year passed as 96)');
 }
 
-if ($ENV{MAINTAINER}) {
+SKIP:
+{
+    skip 'These tests only run for the package maintainer.', 8
+        unless $ENV{MAINTAINER};
+
     require POSIX;
 
     local $ENV{TZ} = 'Europe/Vienna';
