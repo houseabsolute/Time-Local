@@ -1,3 +1,11 @@
+1.19    2008-11-01
+
+- The calculation of the maximum integer size was using
+  $Config{intsize} when it should use $Config{ivsize}. Apparently on a
+  64-bit platform intsize can be 4 when ivsize is 8. Based on a patch
+  from Jan Dubois.
+
+
 1.18    2007-10-31
 
 - Added pod and pod coverage tests.
