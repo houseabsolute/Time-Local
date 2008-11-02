@@ -1,3 +1,9 @@
+1.1901  2008-11-01
+
+- Test fixes only. The tests planned the wrong number of tests on
+  32-bit platforms, causing failures.
+
+
 1.19    2008-11-01
 
 - The calculation of the maximum integer size was using
