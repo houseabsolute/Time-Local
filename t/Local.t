@@ -195,7 +195,7 @@ SKIP:
 
 SKIP:
 {
-    skip 'These tests require a system with 64-bit time_t.', 1
+    skip 'These tests require a system with 64-bit time_t.', 3
         unless $epoch_is_64;
 
     is( timegm( 8, 14, 3, 19, 0, ( 1900 + 138 ) ), 2**31,
