@@ -1,12 +1,5 @@
 #!./perl
 
-BEGIN {
-  if ($ENV{PERL_CORE}){
-    chdir('t') if -d 't';
-    @INC = ('.', '../lib');
-  }
-}
-
 use strict;
 
 use Config;
@@ -26,11 +19,16 @@ my @time =
    # leap day
    [2020,  2, 29, 12, 59, 59],
    [2030,  7,  4, 17, 07, 06],
+
 # The following test fails on a surprising number of systems
 # so it is commented out. The end of the Epoch for a 32-bit signed
 # implementation of time_t should be Jan 19, 2038  03:14:07 UTC.
 #  [2038,  1, 17, 23, 59, 59],     # last full day in any tz
   );
+
+# more than 2**31 time_t - requires a 64bit safe localtime/gmtime
+push @time, [2258,  8, 11,  1, 49, 17]
+    if $] >= 5.012000;
 
 my @bad_time =
     (
@@ -80,7 +78,7 @@ my $tests = (@time * 12);
 $tests += @neg_time * 12;
 $tests += @bad_time;
 $tests += @years;
-$tests += 23;
+$tests += 21;
 
 plan tests => $tests;
 
@@ -89,12 +87,13 @@ for (@time, @neg_time) {
     $year -= 1900;
     $mon--;
 
- SKIP: {
+    SKIP: {
         skip '1970 test on VOS fails.', 12
             if $^O eq 'vos' && $year == 70;
         skip 'this platform does not support negative epochs.', 12
             if $year < 70 && ! $neg_epoch_ok;
 
+        # Test timelocal()
         {
             my $year_in = $year < 70 ? $year + 1900 : $year;
             my $time = timelocal($sec,$min,$hour,$mday,$mon,$year_in);
@@ -109,6 +108,8 @@ for (@time, @neg_time) {
             is($Y, $year, "timelocal year for @$_");
         }
 
+
+        # Test timegm()
         {
             my $year_in = $year < 70 ? $year + 1900 : $year;
             my $time = timegm($sec,$min,$hour,$mday,$mon,$year_in);
@@ -124,6 +125,7 @@ for (@time, @neg_time) {
         }
     }
 }
+
 
 for (@bad_time) {
     my($year, $mon, $mday, $hour, $min, $sec) = @$_;
@@ -262,22 +264,4 @@ SKIP:
 
     is( ( localtime( timelocal( 0, 0, 2, 27, 2, 2005 ) ) )[2], 2,
         'hour is 2 when given 2:00 AM on Europe/London date change' );
-}
-
-SKIP:
-{
-    skip 'These tests are only run when $ENV{PERL_CORE} is true.', 2
-        unless $ENV{PERL_CORE};
-
-    {
-        package test;
-        require 'timelocal.pl';
-
-        # need to get ok() from main package
-        ::is(timegm(0,0,0,1,0,80), main::timegm(0,0,0,1,0,80),
-             'timegm in timelocal.pl');
-
-        ::is(timelocal(1,2,3,4,5,88), main::timelocal(1,2,3,4,5,88),
-             'timelocal in timelocal.pl');
-    }
 }

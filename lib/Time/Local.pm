@@ -4,10 +4,9 @@ require Exporter;
 use Carp;
 use Config;
 use strict;
-use integer;
 
 use vars qw( $VERSION @ISA @EXPORT @EXPORT_OK );
-$VERSION   = '1.1901';
+$VERSION   = '1.1901_01';
 
 @ISA       = qw( Exporter );
 @EXPORT    = qw( timegm timelocal );
@@ -29,16 +28,23 @@ use constant SECS_PER_MINUTE => 60;
 use constant SECS_PER_HOUR   => 3600;
 use constant SECS_PER_DAY    => 86400;
 
-my $MaxInt;
-if ( $^O eq 'MacOS' ) {
-    # time_t is unsigned...
-    $MaxInt = ( 1 << ( 8 * $Config{ivsize} ) ) - 1;
+my $MaxDay;
+if ($] < 5.012000) {
+    my $MaxInt;
+    if ( $^O eq 'MacOS' ) {
+        # time_t is unsigned...
+        $MaxInt = ( 1 << ( 8 * $Config{ivsize} ) ) - 1;
+    }
+    else {
+        $MaxInt = ( ( 1 << ( 8 * $Config{ivsize} - 2 ) ) - 1 ) * 2 + 1;
+    }
+
+    $MaxDay = int( ( $MaxInt - ( SECS_PER_DAY / 2 ) ) / SECS_PER_DAY ) - 1;
 }
 else {
-    $MaxInt = ( ( 1 << ( 8 * $Config{ivsize} - 2 ) ) - 1 ) * 2 + 1;
+    # recent localtime()'s limit is the year 2**31
+    $MaxDay = 365 * (2**31);
 }
-
-my $MaxDay = int( ( $MaxInt - ( SECS_PER_DAY / 2 ) ) / SECS_PER_DAY ) - 1;
 
 # Determine the EPOC day for this machine
 my $Epoc = 0;
@@ -68,13 +74,13 @@ sub _daygm {
     return $_[3] + (
         $Cheat{ pack( 'ss', @_[ 4, 5 ] ) } ||= do {
             my $month = ( $_[4] + 10 ) % 12;
-            my $year  = ( $_[5] + 1900 ) - ( $month / 10 );
+            my $year  = $_[5] + 1900 - int($month / 10);
 
             ( ( 365 * $year )
-              + ( $year / 4 )
-              - ( $year / 100 )
-              + ( $year / 400 )
-              + ( ( ( $month * 306 ) + 5 ) / 10 )
+              + int( $year / 4 )
+              - int( $year / 100 )
+              + int( $year / 400 )
+              + int( ( ( $month * 306 ) + 5 ) / 10 )
             )
             - $Epoc;
         }
@@ -277,13 +283,18 @@ particularly if 4-digit years are used.
 
 =head2 Limits of time_t
 
-The range of dates that can be actually be handled depends on the size
-of C<time_t> (usually a signed integer) on the given
-platform. Currently, this is 32 bits for most systems, yielding an
-approximate range from Dec 1901 to Jan 2038.
+On perl versions older than 5.12.0, the range of dates that can be
+actually be handled depends on the size of C<time_t> (usually a signed
+integer) on the given platform. Currently, this is 32 bits for most
+systems, yielding an approximate range from Dec 1901 to Jan 2038.
 
 Both C<timelocal()> and C<timegm()> croak if given dates outside the
 supported range.
+
+As of version 5.12.0, perl has stopped using the underlying time
+library of the operating system it's running on and has its own
+implementation of those routines with a safe range of at least
++/ 2**52 (about 142 million years).
 
 =head2 Ambiguous Local Times (DST)
 
@@ -309,10 +320,12 @@ will simply return an epoch value for the time one hour later.
 
 =head2 Negative Epoch Values
 
-Negative epoch (C<time_t>) values are not officially supported by the
-POSIX standards, so this module's tests do not test them. On some
-systems, they are known not to work. These include MacOS (pre-OSX) and
-Win32.
+On perl version 5.12.0 and newer, negative epoch values are fully
+supported.
+
+On older versions of perl, negative epoch (C<time_t>) values, which
+are not officially supported by the POSIX standards, are known not to
+work on some systems. These include MacOS (pre-OSX) and Win32.
 
 On systems which do support negative epoch values, this module should
 be able to cope with dates before the start of the epoch, down the
