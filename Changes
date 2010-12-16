@@ -1,3 +1,9 @@
+1.1902  2010-12-16  TRIAL RELEASE
+
+- Merge all changes from blead perl.
+- Try to restore compatibility with older perls, which don't have a 64bit
+  capable localtime/gmtime.
+
 1.1901  2008-11-01
 
 - Test fixes only. The tests planned the wrong number of tests on
