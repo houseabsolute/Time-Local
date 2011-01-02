@@ -6,7 +6,7 @@ use Config;
 use strict;
 
 use vars qw( $VERSION @ISA @EXPORT @EXPORT_OK );
-$VERSION   = '1.1902';
+$VERSION   = '1.2000';
 
 @ISA       = qw( Exporter );
 @EXPORT    = qw( timegm timelocal );
