@@ -201,8 +201,8 @@ Time::Local - efficiently compute time from local and GMT time
 
 =head1 SYNOPSIS
 
-    $time = timelocal($sec,$min,$hour,$mday,$mon,$year);
-    $time = timegm($sec,$min,$hour,$mday,$mon,$year);
+    $time = timelocal( $sec, $min, $hour, $mday, $mon, $year );
+    $time = timegm( $sec, $min, $hour, $mday, $mon, $year );
 
 =head1 DESCRIPTION
 
@@ -239,7 +239,7 @@ C<timegm_nocheck()>. These variants must be explicitly imported.
     use Time::Local 'timelocal_nocheck';
 
     # The 365th day of 1999
-    print scalar localtime timelocal_nocheck 0,0,0,365,0,99;
+    print scalar localtime timelocal_nocheck( 0, 0, 0, 365, 0, 99 );
 
 If you supply data which is not valid (month 27, second 1,000) the
 results will be unpredictable (so don't do that).
