@@ -109,7 +109,7 @@ sub timegm {
             if $month > 11
             or $month < 0;
 
-	my $md = $MonthDays[$month];
+    my $md = $MonthDays[$month];
         ++$md
             if $month == 1 && _is_leap_year( $year + 1900 );
 
@@ -125,10 +125,10 @@ sub timegm {
         my $msg = '';
         $msg .= "Day too big - $days > $MaxDay\n" if $days > $MaxDay;
 
-	$year += 1900;
+        $year += 1900;
         $msg .=  "Cannot handle date ($sec, $min, $hour, $mday, $month, $year)";
 
-	croak $msg;
+        croak $msg;
     }
 
     return $sec
