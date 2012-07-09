@@ -1,5 +1,8 @@
 {{$NEXT}}
 
+- Explicitly require Test::More 0.88+ for tests.
+
+
 1.2100  2012-07-09
 
 - A seconds value greater than 59 but less than 60 caused timegm() and
