@@ -1,5 +1,8 @@
 {{$NEXT}}
 
+- Doh, fix the repo & bugtracker info in the META files.
+
+
 1.2200  2012-07-09
 
 - Explicitly require Test::More 0.88+ for tests.
