@@ -116,7 +116,7 @@ sub timegm {
         croak "Day '$mday' out of range 1..$md"  if $mday > $md or $mday < 1;
         croak "Hour '$hour' out of range 0..23"  if $hour > 23  or $hour < 0;
         croak "Minute '$min' out of range 0..59" if $min > 59   or $min < 0;
-        croak "Second '$sec' out of range 0..59" if $sec > 59   or $sec < 0;
+        croak "Second '$sec' out of range 0..59" if $sec >= 60  or $sec < 0;
     }
 
     my $days = _daygm( undef, undef, undef, $mday, $month, $year );
