@@ -24,6 +24,9 @@ my @time =
 # so it is commented out. The end of the Epoch for a 32-bit signed
 # implementation of time_t should be Jan 19, 2038  03:14:07 UTC.
 #  [2038,  1, 17, 23, 59, 59],     # last full day in any tz
+
+   [2010, 10, 12, 14, 13, 12.1],
+   [2010, 10, 12, 14, 13, 59.1],
   );
 
 # more than 2**31 time_t - requires a 64bit safe localtime/gmtime
@@ -100,7 +103,7 @@ for (@time, @neg_time) {
 
             my($s,$m,$h,$D,$M,$Y) = localtime($time);
 
-            is($s, $sec, "timelocal second for @$_");
+            is($s, int($sec), "timelocal second for @$_");
             is($m, $min, "timelocal minute for @$_");
             is($h, $hour, "timelocal hour for @$_");
             is($D, $mday, "timelocal day for @$_");
@@ -116,7 +119,7 @@ for (@time, @neg_time) {
 
             my($s,$m,$h,$D,$M,$Y) = gmtime($time);
 
-            is($s, $sec, "timegm second for @$_");
+            is($s, int($sec), "timegm second for @$_");
             is($m, $min, "timegm minute for @$_");
             is($h, $hour, "timegm hour for @$_");
             is($D, $mday, "timegm day for @$_");
