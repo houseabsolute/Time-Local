@@ -1,6 +1,7 @@
 #!./perl
 
 use strict;
+use warnings;
 
 use Config;
 use Test::More;
@@ -76,14 +77,6 @@ if ($^O eq 'VMS') {
 }
 
 my $epoch_is_64 = eval { $Config{ivsize} == 8 && ( gmtime 2**40 )[5] == 34912 };
-
-my $tests = (@time * 12);
-$tests += @neg_time * 12;
-$tests += @bad_time;
-$tests += @years;
-$tests += 21;
-
-plan tests => $tests;
 
 for (@time, @neg_time) {
     my($year, $mon, $mday, $hour, $min, $sec) = @$_;
@@ -268,3 +261,5 @@ SKIP:
     is( ( localtime( timelocal( 0, 0, 2, 27, 2, 2005 ) ) )[2], 2,
         'hour is 2 when given 2:00 AM on Europe/London date change' );
 }
+
+done_testing();
