@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+1.2100  2012-07-09
+
 - A seconds value greater than 59 but less than 60 caused timegm() and
   timelocal() to croak. Now we allow any value that's less than 60. RT #78189.
 
