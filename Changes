@@ -154,7 +154,7 @@
   Ing-Simmons.
 
 - Don't expect edge case tests to pass on AIX 4.3, since the OS is
-  obselete.  Patch from core passed on my H. Merijn Brand.
+  obsolete.  Patch from core passed on my H. Merijn Brand.
 
 
 1.07_94  2003-12-11
