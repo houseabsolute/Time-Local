@@ -206,10 +206,14 @@ __END__
 
 Time::Local - efficiently compute time from local and GMT time
 
+=for test_synopsis my ( $sec, $min, $hour, $mday, $mon, $year );
+
 =head1 SYNOPSIS
 
-    $time = timelocal( $sec, $min, $hour, $mday, $mon, $year );
-    $time = timegm( $sec, $min, $hour, $mday, $mon, $year );
+    use Time::Local;
+
+    my $time = timelocal( $sec, $min, $hour, $mday, $mon, $year );
+    my $time = timegm( $sec, $min, $hour, $mday, $mon, $year );
 
 =head1 DESCRIPTION
 
