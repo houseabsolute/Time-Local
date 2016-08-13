@@ -1,8 +1,8 @@
 requires "Carp" => "0";
 requires "Exporter" => "0";
 requires "constant" => "0";
+requires "parent" => "0";
 requires "strict" => "0";
-requires "vars" => "0";
 
 on 'test' => sub {
   requires "ExtUtils::MakeMaker" => "0";
@@ -43,7 +43,6 @@ on 'develop' => sub {
   requires "Test::Pod::No404s" => "0";
   requires "Test::Portability::Files" => "0";
   requires "Test::Spelling" => "0.12";
-  requires "Test::Synopsis" => "0";
   requires "Test::Vars" => "0.009";
   requires "Test::Version" => "1";
   requires "blib" => "1.01";

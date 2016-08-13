@@ -204,8 +204,6 @@ sub timelocal_nocheck {
 
 __END__
 
-=for test_synopsis my ( $sec, $min, $hour, $mday, $mon, $year );
-
 =head1 SYNOPSIS
 
     use Time::Local;
