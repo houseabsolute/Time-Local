@@ -1,16 +1,17 @@
 package Time::Local;
 
-require Exporter;
-use Carp;
-use Config;
 use strict;
 
-use vars qw( $VERSION @ISA @EXPORT @EXPORT_OK );
-$VERSION   = '1.2300';
+use Carp;
+use Config;
+use Exporter;
 
-@ISA       = qw( Exporter );
-@EXPORT    = qw( timegm timelocal );
-@EXPORT_OK = qw( timegm_nocheck timelocal_nocheck );
+our $VERSION = '1.2300';
+
+use parent 'Exporter';
+
+our @EXPORT    = qw( timegm timelocal );
+our @EXPORT_OK = qw( timegm_nocheck timelocal_nocheck );
 
 my @MonthDays = ( 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 );
 
@@ -29,9 +30,10 @@ use constant SECS_PER_HOUR   => 3600;
 use constant SECS_PER_DAY    => 86400;
 
 my $MaxDay;
-if ($] < 5.012000) {
+if ( $] < 5.012000 ) {
     my $MaxInt;
     if ( $^O eq 'MacOS' ) {
+
         # time_t is unsigned...
         $MaxInt = ( 1 << ( 8 * $Config{ivsize} ) ) - 1;
     }
@@ -43,22 +45,23 @@ if ($] < 5.012000) {
 }
 else {
     # recent localtime()'s limit is the year 2**31
-    $MaxDay = 365 * (2**31);
+    $MaxDay = 365 * ( 2**31 );
 }
 
 # Determine the EPOC day for this machine
 my $Epoc = 0;
 if ( $^O eq 'vos' ) {
+
     # work around posix-977 -- VOS doesn't handle dates in the range
     # 1970-1980.
     $Epoc = _daygm( 0, 0, 0, 1, 0, 70, 4, 0 );
 }
 elsif ( $^O eq 'MacOS' ) {
-    $MaxDay *=2 if $^O eq 'MacOS';  # time_t unsigned ... quick hack?
-    # MacOS time() is seconds since 1 Jan 1904, localtime
-    # so we need to calculate an offset to apply later
-    $Epoc = 693901;
-    $SecOff = timelocal( localtime(0)) - timelocal( gmtime(0) ) ;
+    $MaxDay *= 2 if $^O eq 'MacOS';    # time_t unsigned ... quick hack?
+          # MacOS time() is seconds since 1 Jan 1904, localtime
+          # so we need to calculate an offset to apply later
+    $Epoc   = 693901;
+    $SecOff = timelocal( localtime(0) ) - timelocal( gmtime(0) );
     $Epoc += _daygm( gmtime(0) );
 }
 else {
@@ -74,22 +77,23 @@ sub _daygm {
     return $_[3] + (
         $Cheat{ pack( 'ss', @_[ 4, 5 ] ) } ||= do {
             my $month = ( $_[4] + 10 ) % 12;
-            my $year  = $_[5] + 1900 - int($month / 10);
+            my $year  = $_[5] + 1900 - int( $month / 10 );
 
             ( ( 365 * $year )
-              + int( $year / 4 )
-              - int( $year / 100 )
-              + int( $year / 400 )
-              + int( ( ( $month * 306 ) + 5 ) / 10 )
-            )
-            - $Epoc;
-        }
+                + int( $year / 4 )
+                    - int( $year / 100 )
+                    + int( $year / 400 )
+                    + int( ( ( $month * 306 ) + 5 ) / 10 ) )
+                - $Epoc;
+            }
     );
 }
 
 sub _timegm {
-    my $sec =
-        $SecOff + $_[0] + ( SECS_PER_MINUTE * $_[1] ) + ( SECS_PER_HOUR * $_[2] );
+    my $sec
+        = $SecOff + $_[0]
+        + ( SECS_PER_MINUTE * $_[1] )
+        + ( SECS_PER_HOUR * $_[2] );
 
     return $sec + ( SECS_PER_DAY * &_daygm );
 }
@@ -109,7 +113,7 @@ sub timegm {
             if $month > 11
             or $month < 0;
 
-    my $md = $MonthDays[$month];
+        my $md = $MonthDays[$month];
         ++$md
             if $month == 1 && _is_leap_year( $year + 1900 );
 
@@ -121,21 +125,22 @@ sub timegm {
 
     my $days = _daygm( undef, undef, undef, $mday, $month, $year );
 
-    unless ($Options{no_range_check} or abs($days) < $MaxDay) {
-        my $msg = '';
+    unless ( $Options{no_range_check} or abs($days) < $MaxDay ) {
+        my $msg = q{};
         $msg .= "Day too big - $days > $MaxDay\n" if $days > $MaxDay;
 
         $year += 1900;
-        $msg .=  "Cannot handle date ($sec, $min, $hour, $mday, $month, $year)";
+        $msg
+            .= "Cannot handle date ($sec, $min, $hour, $mday, $month, $year)";
 
         croak $msg;
     }
 
-    return $sec
-           + $SecOff
-           + ( SECS_PER_MINUTE * $min )
-           + ( SECS_PER_HOUR * $hour )
-           + ( SECS_PER_DAY * $days );
+    return
+          $sec + $SecOff
+        + ( SECS_PER_MINUTE * $min )
+        + ( SECS_PER_HOUR * $hour )
+        + ( SECS_PER_DAY * $days );
 }
 
 sub _is_leap_year {
@@ -152,7 +157,7 @@ sub timegm_nocheck {
 }
 
 sub timelocal {
-    my $ref_t = &timegm;
+    my $ref_t         = &timegm;
     my $loc_for_ref_t = _timegm( localtime($ref_t) );
 
     my $zone_off = $loc_for_ref_t - $ref_t
@@ -167,9 +172,11 @@ sub timelocal {
     # If this evaluates to true, it means that the value in $loc_t is
     # the _second_ hour after a DST change where the local time moves
     # backward.
-    if ( ! $dst_off &&
-         ( ( $ref_t - SECS_PER_HOUR ) - _timegm( localtime( $loc_t - SECS_PER_HOUR ) ) < 0 )
-       ) {
+    if (
+        !$dst_off
+        && ( ( $ref_t - SECS_PER_HOUR )
+            - _timegm( localtime( $loc_t - SECS_PER_HOUR ) ) < 0 )
+        ) {
         return $loc_t - SECS_PER_HOUR;
     }
 
