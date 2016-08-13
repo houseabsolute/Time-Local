@@ -227,7 +227,7 @@ system's epoch may not work on all operating systems.
 
 It is worth drawing particular attention to the expected ranges for
 the values provided. The value for the day of the month is the actual
-day (ie 1..31), while the month is the number of months since January
+day (i.e. 1..31), while the month is the number of months since January
 (0..11). This is consistent with the values returned from
 C<localtime()> and C<gmtime()>.
 
