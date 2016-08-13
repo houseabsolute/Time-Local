@@ -6,7 +6,7 @@ use Carp;
 use Config;
 use Exporter;
 
-our $VERSION = '1.2300';
+our $VERSION = '1.24';
 
 use parent 'Exporter';
 
