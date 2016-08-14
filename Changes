@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+1.24     2016-08-13
+
 - Set the INSTALLDIRS to 'perl' for Perl 5.10 and earlier. Without this, you
   can upgrade Time::Local from CPAN but perl will not see the upgraded
   version. Reported by Olivier Mengué. RT #116825.
