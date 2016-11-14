@@ -1,5 +1,9 @@
 {{$NEXT}}
 
+- Reduce memory usage by only loading Config if needed and not importing from
+  Carp. Based on PR #2 from J. Nick Coston.
+
+
 1.24     2016-08-13
 
 - Set the INSTALLDIRS to 'perl' for Perl 5.10 and earlier. Without this, you
