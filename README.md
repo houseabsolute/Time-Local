@@ -4,7 +4,7 @@ Time::Local - Efficiently compute time from local and GMT time
 
 # VERSION
 
-version 1.24
+version 1.25
 
 # SYNOPSIS
 
@@ -148,21 +148,22 @@ The current version was written by Graham Barr.
 
 The whole scheme for interpreting two-digit years can be considered a bug.
 
-Bugs may be submitted through [the RT bug tracker](http://rt.cpan.org/Public/Dist/Display.html?Name=Time-Local)
-(or [bug-time-local@rt.cpan.org](mailto:bug-time-local@rt.cpan.org)).
+Bugs may be submitted through [https://github.com/houseabsolute/Time-Local/issues](https://github.com/houseabsolute/Time-Local/issues).
 
 There is a mailing list available for users of this distribution,
 [mailto:datetime@perl.org](mailto:datetime@perl.org).
 
-I am also usually active on IRC as 'drolsky' on `irc://irc.perl.org`.
+I am also usually active on IRC as 'autarch' on `irc://irc.perl.org`.
 
 # AUTHOR
 
 Dave Rolsky <autarch@urth.org>
 
-# CONTRIBUTOR
+# CONTRIBUTORS
 
-Florian Ragwitz <rafl@debian.org>
+- Florian Ragwitz <rafl@debian.org>
+- J. Nick Koston <nick@cpanel.net>
+- Unknown <unknown@example.com>
 
 # COPYRIGHT AND LICENSE
 

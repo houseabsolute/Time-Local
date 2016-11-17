@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+1.25     2016-11-17
+
 - Reduce memory usage by only loading Config if needed and not importing from
   Carp. Based on PR #2 from J. Nick Coston.
 
