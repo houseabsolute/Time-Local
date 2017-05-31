@@ -63,8 +63,8 @@ if ( $^O eq 'vos' ) {
 }
 elsif ( $^O eq 'MacOS' ) {
     $MaxDay *= 2;    # time_t unsigned ... quick hack?
-        # MacOS time() is seconds since 1 Jan 1904, localtime
-        # so we need to calculate an offset to apply later
+          # MacOS time() is seconds since 1 Jan 1904, localtime
+          # so we need to calculate an offset to apply later
     $Epoc   = 693901;
     $SecOff = timelocal( localtime(0) ) - timelocal( gmtime(0) );
     $Epoc += _daygm( gmtime(0) );
