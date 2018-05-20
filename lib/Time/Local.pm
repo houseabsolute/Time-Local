@@ -9,8 +9,9 @@ our $VERSION = '1.26';
 
 use parent 'Exporter';
 
-our @EXPORT    = qw( timegm timelocal );
-our @EXPORT_OK = qw( timegm_nocheck timelocal_nocheck );
+our @EXPORT = qw( timegm timelocal );
+our @EXPORT_OK
+    = qw( timegm_modern timelocal_modern timegm_nocheck timelocal_nocheck );
 
 my @MonthDays = ( 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 );
 
@@ -105,11 +106,16 @@ sub _timegm {
 sub timegm {
     my ( $sec, $min, $hour, $mday, $month, $year ) = @_;
 
-    if ( $year >= 1000 ) {
+    if ( $Options{no_year_munging} ) {
         $year -= 1900;
     }
-    elsif ( $year < 100 and $year >= 0 ) {
-        $year += ( $year > $Breakpoint ) ? $Century : $NextCentury;
+    else {
+        if ( $year >= 1000 ) {
+            $year -= 1900;
+        }
+        elsif ( $year < 100 and $year >= 0 ) {
+            $year += ( $year > $Breakpoint ) ? $Century : $NextCentury;
+        }
     }
 
     unless ( $Options{no_range_check} ) {
@@ -164,6 +170,11 @@ sub timegm_nocheck {
     return &timegm;
 }
 
+sub timegm_modern {
+    local $Options{no_year_munging} = 1;
+    return &timegm;
+}
+
 sub timelocal {
     my $ref_t         = &timegm;
     my $loc_for_ref_t = _timegm( localtime($ref_t) );
@@ -206,6 +217,11 @@ sub timelocal_nocheck {
     return &timelocal;
 }
 
+sub timelocal_modern {
+    local $Options{no_year_munging} = 1;
+    return &timelocal;
+}
+
 1;
 
 # ABSTRACT: Efficiently compute time from local and GMT time
@@ -235,6 +251,28 @@ consistent with the values returned from C<localtime()> and C<gmtime()>.
 
 =head1 FUNCTIONS
 
+=head2 C<timelocal_modern()> and C<timegm_modern()>
+
+When C<Time::Local> was first written, it was a common practice to represent
+years as a two-digit value like C<99> for C<1999> or C<1> for C<2001>. This
+caused all sorts of problems (google "Y2K problem" if you're very young) and
+developers eventually realized that this was a terrible idea.
+
+The default exports of C<timelocal()> and C<timegm()> do a complicated
+calculation when given a year value less than 1000. This leads to surprising
+results in many cases. See L</Year Value Interpretation> for details.
+
+The C<time*_modern()> subs do not do this year munging and simply take the
+year value as provided.
+
+While it would be nice to make this the default behavior, that would almost
+certainly break a lot of code, so you must explicitly import these subs and
+use them instead of the default C<timelocal()> and C<timegm()>.
+
+You are B<strongly> encouraged to use these subs in any new code which uses
+this module. It will almost certainly make your code's behavior less
+surprising.
+
 =head2 C<timelocal()> and C<timegm()>
 
 This module exports two functions by default, C<timelocal()> and C<timegm()>.
@@ -257,6 +295,9 @@ If you supply data which is not valid (month 27, second 1,000) the results
 will be unpredictable (so don't do that).
 
 =head2 Year Value Interpretation
+
+B<This does not apply to C<timelocal_modern> or C<timegm_modern>. Use those
+exports if you want to ensure consistent behavior as your code ages.>
 
 Strictly speaking, the year should be specified in a form consistent with
 C<localtime()>, i.e. the offset from 1900. In order to make the interpretation
