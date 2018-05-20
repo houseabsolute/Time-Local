@@ -184,7 +184,7 @@ sub timelocal {
         !$dst_off
         && ( ( $ref_t - SECS_PER_HOUR )
             - _timegm( localtime( $loc_t - SECS_PER_HOUR ) ) < 0 )
-        ) {
+    ) {
         return $loc_t - SECS_PER_HOUR;
     }
 
