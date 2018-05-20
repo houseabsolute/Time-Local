@@ -72,22 +72,19 @@ sub _test_group {
 
     for my $vals ( @{$group} ) {
         my ( $year, $mon, $mday, $hour, $min, $sec ) = @{$vals};
-        $year -= 1900;
         $mon--;
 
         # 1970 test on VOS fails
-        next if $^O eq 'vos' && $year == 70;
+        next if $^O eq 'vos' && $year == 1970;
 
         subtest(
             'timelocal',
             sub {
-                my $year_in = $year < 70 ? $year + 1900 : $year;
-                my $time
-                    = timelocal( $sec, $min, $hour, $mday, $mon, $year_in );
+                my $time = timelocal( $sec, $min, $hour, $mday, $mon, $year );
 
                 is_deeply(
                     [ ( localtime($time) )[ 0 .. 5 ] ],
-                    [ int($sec), $min, $hour, $mday, $mon, $year ],
+                    [ int($sec), $min, $hour, $mday, $mon, $year - 1900 ],
                     "timelocal for @{$vals}"
                 );
             },
@@ -96,12 +93,11 @@ sub _test_group {
         subtest(
             'timegm',
             sub {
-                my $year_in = $year < 70 ? $year + 1900 : $year;
-                my $time = timegm( $sec, $min, $hour, $mday, $mon, $year_in );
+                my $time = timegm( $sec, $min, $hour, $mday, $mon, $year );
 
                 is_deeply(
                     [ ( gmtime($time) )[ 0 .. 5 ] ],
-                    [ int($sec), $min, $hour, $mday, $mon, $year ],
+                    [ int($sec), $min, $hour, $mday, $mon, $year - 1900 ],
                     "timegm for @{$vals}"
                 );
             },
@@ -126,7 +122,6 @@ subtest(
                 sub {
                     my ( $year, $mon, $mday, $hour, $min, $sec )
                         = @{ $bad{$key} };
-                    $year -= 1900;
                     $mon--;
 
                     local $@ = undef;
@@ -268,19 +263,45 @@ SKIP:
         '64-bit time_t values',
         sub {
             is(
-                timegm( 8, 14, 3, 19, 0, ( 1900 + 138 ) ), 2**31,
+                timegm( 8, 14, 3, 19, 0, 2038 ), 2**31,
                 'can call timegm for 2**31 epoch seconds'
             );
             is(
-                timegm( 16, 28, 6, 7, 1, ( 1900 + 206 ) ), 2**32,
+                timegm( 16, 28, 6, 7, 1, 2106 ), 2**32,
                 'can call timegm for 2**32 epoch seconds (on a 64-bit system)'
             );
             is(
-                timegm( 16, 36, 0, 20, 1, ( 34912 + 1900 ) ), 2**40,
+                timegm( 16, 36, 0, 20, 1, 36812 ), 2**40,
                 'can call timegm for 2**40 epoch seconds (on a 64-bit system)'
             );
         },
     );
 }
+
+subtest(
+    '2-digit years',
+    sub {
+        my $current_year = ( localtime() )[5];
+        my $pre_break    = ( $current_year + 49 ) - 100;
+        my $break        = ( $current_year + 50 ) - 100;
+        my $post_break   = ( $current_year + 51 ) - 100;
+
+        is(
+            ( ( localtime( timelocal( 0, 0, 0, 1, 1, $pre_break ) ) )[5] ),
+            $pre_break + 100,
+            "year $pre_break is treated as next century",
+        );
+        is(
+            ( ( localtime( timelocal( 0, 0, 0, 1, 1, $break ) ) )[5] ),
+            $break + 100,
+            "year $break is treated as next century",
+        );
+        is(
+            ( ( localtime( timelocal( 0, 0, 0, 1, 1, $post_break ) ) )[5] ),
+            $post_break,
+            "year $post_break is treated as current century",
+        );
+    },
+);
 
 done_testing();
