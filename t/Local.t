@@ -203,80 +203,74 @@ subtest(
     }
 );
 
-SKIP:
-{
-    skip 'this platform does not support negative epochs.', 6
-        unless $neg_epoch_ok;
+subtest(
+    'negative epochs',
+    sub {
+        plan skip_all => 'this platform does not support negative epochs.'
+            unless $neg_epoch_ok;
 
-    subtest(
-        'negative epochs',
-        sub {
+        local $@ = undef;
+        eval { timegm( 0, 0, 0, 29, 1, 1900 ) };
+        like(
+            $@, qr/Day '29' out of range 1\.\.28/,
+            'does not accept leap day in 1900'
+        );
 
-            local $@ = undef;
-            eval { timegm( 0, 0, 0, 29, 1, 1900 ) };
-            like(
-                $@, qr/Day '29' out of range 1\.\.28/,
-                'does not accept leap day in 1900'
-            );
+        local $@ = undef;
+        eval { timegm( 0, 0, 0, 29, 1, 200 ) };
+        like(
+            $@, qr/Day '29' out of range 1\.\.28/,
+            'does not accept leap day in 2100 (year passed as 200)'
+        );
 
-            local $@ = undef;
-            eval { timegm( 0, 0, 0, 29, 1, 200 ) };
-            like(
-                $@, qr/Day '29' out of range 1\.\.28/,
-                'does not accept leap day in 2100 (year passed as 200)'
-            );
+        local $@ = undef;
+        eval { timegm( 0, 0, 0, 29, 1, 0 ) };
+        is(
+            $@, q{},
+            'no error with leap day of 2000 (year passed as 0)'
+        );
 
-            local $@ = undef;
-            eval { timegm( 0, 0, 0, 29, 1, 0 ) };
-            is(
-                $@, q{},
-                'no error with leap day of 2000 (year passed as 0)'
-            );
+        local $@ = undef;
+        eval { timegm( 0, 0, 0, 29, 1, 1904 ) };
+        is( $@, q{}, 'no error with leap day of 1904' );
 
-            local $@ = undef;
-            eval { timegm( 0, 0, 0, 29, 1, 1904 ) };
-            is( $@, q{}, 'no error with leap day of 1904' );
+        local $@ = undef;
+        eval { timegm( 0, 0, 0, 29, 1, 4 ) };
+        is(
+            $@, q{},
+            'no error with leap day of 2004 (year passed as 4)'
+        );
 
-            local $@ = undef;
-            eval { timegm( 0, 0, 0, 29, 1, 4 ) };
-            is(
-                $@, q{},
-                'no error with leap day of 2004 (year passed as 4)'
-            );
+        local $@ = undef;
+        eval { timegm( 0, 0, 0, 29, 1, 96 ) };
+        is(
+            $@, q{},
+            'no error with leap day of 1996 (year passed as 96)'
+        );
+    },
+);
 
-            local $@ = undef;
-            eval { timegm( 0, 0, 0, 29, 1, 96 ) };
-            is(
-                $@, q{},
-                'no error with leap day of 1996 (year passed as 96)'
-            );
-        },
-    );
-}
+subtest(
+    '64-bit time_t values',
+    sub {
+        plan skip_all =>
+            'These tests require support for 64-bit time_t values'
+            unless $epoch_is_64;
 
-SKIP:
-{
-    skip 'These tests require support for 64-bit time_t values', 3
-        unless $epoch_is_64;
-
-    subtest(
-        '64-bit time_t values',
-        sub {
-            is(
-                timegm( 8, 14, 3, 19, 0, 2038 ), 2**31,
-                'can call timegm for 2**31 epoch seconds'
-            );
-            is(
-                timegm( 16, 28, 6, 7, 1, 2106 ), 2**32,
-                'can call timegm for 2**32 epoch seconds (on a 64-bit system)'
-            );
-            is(
-                timegm( 16, 36, 0, 20, 1, 36812 ), 2**40,
-                'can call timegm for 2**40 epoch seconds (on a 64-bit system)'
-            );
-        },
-    );
-}
+        is(
+            timegm( 8, 14, 3, 19, 0, 2038 ), 2**31,
+            'can call timegm for 2**31 epoch seconds'
+        );
+        is(
+            timegm( 16, 28, 6, 7, 1, 2106 ), 2**32,
+            'can call timegm for 2**32 epoch seconds (on a 64-bit system)'
+        );
+        is(
+            timegm( 16, 36, 0, 20, 1, 36812 ), 2**40,
+            'can call timegm for 2**40 epoch seconds (on a 64-bit system)'
+        );
+    },
+);
 
 subtest(
     '2-digit years',
