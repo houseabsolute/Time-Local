@@ -4,7 +4,7 @@ Time::Local - Efficiently compute time from local and GMT time
 
 # VERSION
 
-version 1.25
+version 1.26
 
 # SYNOPSIS
 
@@ -84,9 +84,10 @@ approximate range from Dec 1901 to Jan 2038.
 Both `timelocal()` and `timegm()` croak if given dates outside the supported
 range.
 
-As of version 5.12.0, perl has stopped using the underlying time library of
-the operating system it's running on and has its own implementation of those
-routines with a safe range of at least +/ 2\*\*52 (about 142 million years).
+As of version 5.12.0, perl has stopped using the time implementation of the
+operating system it's running on. Instead, it has its own implementation of
+those routines with a safe range of at least +/- 2\*\*52 (about 142 million
+years)
 
 ## Ambiguous Local Times (DST)
 
@@ -148,12 +149,16 @@ The current version was written by Graham Barr.
 
 The whole scheme for interpreting two-digit years can be considered a bug.
 
-Bugs may be submitted through [https://github.com/houseabsolute/Time-Local/issues](https://github.com/houseabsolute/Time-Local/issues).
+Bugs may be submitted at [https://github.com/houseabsolute/Time-Local/issues](https://github.com/houseabsolute/Time-Local/issues).
 
 There is a mailing list available for users of this distribution,
 [mailto:datetime@perl.org](mailto:datetime@perl.org).
 
 I am also usually active on IRC as 'autarch' on `irc://irc.perl.org`.
+
+# SOURCE
+
+The source code repository for Time-Local can be found at [https://github.com/houseabsolute/Time-Local](https://github.com/houseabsolute/Time-Local).
 
 # AUTHOR
 
@@ -167,7 +172,10 @@ Dave Rolsky <autarch@urth.org>
 
 # COPYRIGHT AND LICENSE
 
-This software is copyright (c) 1997 - 2016 by Graham Barr & Dave Rolsky.
+This software is copyright (c) 1997 - 2018 by Graham Barr & Dave Rolsky.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
+
+The full text of the license can be found in the
+`LICENSE` file included with this distribution.
