@@ -63,9 +63,9 @@ if ( $^O eq 'vos' ) {
     $Epoc = _daygm( 0, 0, 0, 1, 0, 70, 4, 0 );
 }
 elsif ( $^O eq 'MacOS' ) {
-    $MaxDay *= 2 if $^O eq 'MacOS';    # time_t unsigned ... quick hack?
-          # MacOS time() is seconds since 1 Jan 1904, localtime
-          # so we need to calculate an offset to apply later
+    $MaxDay *= 2;    # time_t unsigned ... quick hack?
+                     # MacOS time() is seconds since 1 Jan 1904, localtime
+                     # so we need to calculate an offset to apply later
     $Epoc   = 693901;
     $SecOff = timelocal( localtime(0) ) - timelocal( gmtime(0) );
     $Epoc += _daygm( gmtime(0) );
@@ -74,7 +74,7 @@ else {
     $Epoc = _daygm( gmtime(0) );
 }
 
-%Cheat = ();    # clear the cache as epoc has changed
+%Cheat = ();         # clear the cache as epoc has changed
 
 sub _daygm {
 
