@@ -29,6 +29,28 @@ consistent with the values returned from `localtime()` and `gmtime()`.
 
 # FUNCTIONS
 
+## `timelocal_modern()` and `timegm_modern()`
+
+When `Time::Local` was first written, it was a common practice to represent
+years as a two-digit value like `99` for `1999` or `1` for `2001`. This
+caused all sorts of problems (google "Y2K problem" if you're very young) and
+developers eventually realized that this was a terrible idea.
+
+The default exports of `timelocal()` and `timegm()` do a complicated
+calculation when given a year value less than 1000. This leads to surprising
+results in many cases. See ["Year Value Interpretation"](#year-value-interpretation) for details.
+
+The `time*_modern()` subs do not do this year munging and simply take the
+year value as provided.
+
+While it would be nice to make this the default behavior, that would almost
+certainly break a lot of code, so you must explicitly import these subs and
+use them instead of the default `timelocal()` and `timegm()`.
+
+You are **strongly** encouraged to use these subs in any new code which uses
+this module. It will almost certainly make your code's behavior less
+surprising.
+
 ## `timelocal()` and `timegm()`
 
 This module exports two functions by default, `timelocal()` and `timegm()`.
@@ -51,6 +73,9 @@ If you supply data which is not valid (month 27, second 1,000) the results
 will be unpredictable (so don't do that).
 
 ## Year Value Interpretation
+
+**This does not apply to `timelocal_modern` or `timegm_modern`. Use those
+exports if you want to ensure consistent behavior as your code ages.**
 
 Strictly speaking, the year should be specified in a form consistent with
 `localtime()`, i.e. the offset from 1900. In order to make the interpretation

@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+1.26     2018-05-20 (TRIAL RELEASE)
+
 - Fixed the tests so they will not break in the year 2020. The tests were
   passing in 2-digit years on the assumption that a year like "70" would be
   treated as 1970, but starting in 2020 this would be treated as 2070
