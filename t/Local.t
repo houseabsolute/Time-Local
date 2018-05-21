@@ -5,7 +5,8 @@ use warnings;
 
 use Config;
 use Test::More 0.96;
-use Time::Local;
+use Time::Local
+    qw( timegm timelocal timegm_modern timelocal_modern timegm_nocheck timelocal_nocheck );
 
 # Use 3 days before the start of the epoch because with Borland on
 # Win32 it will work for -3600 _if_ your time zone is +01:00 (or
@@ -77,31 +78,37 @@ sub _test_group {
         # 1970 test on VOS fails
         next if $^O eq 'vos' && $year == 1970;
 
-        subtest(
-            'timelocal',
-            sub {
-                my $time = timelocal( $sec, $min, $hour, $mday, $mon, $year );
+        for my $sub (qw( timelocal timelocal_nocheck timelocal_modern )) {
+            subtest(
+                $sub,
+                sub {
+                    my $time = __PACKAGE__->can($sub)
+                        ->( $sec, $min, $hour, $mday, $mon, $year );
 
-                is_deeply(
-                    [ ( localtime($time) )[ 0 .. 5 ] ],
-                    [ int($sec), $min, $hour, $mday, $mon, $year - 1900 ],
-                    "timelocal for @{$vals}"
-                );
-            },
-        );
+                    is_deeply(
+                        [ ( localtime($time) )[ 0 .. 5 ] ],
+                        [ int($sec), $min, $hour, $mday, $mon, $year - 1900 ],
+                        "timelocal for @{$vals}"
+                    );
+                },
+            );
+        }
 
-        subtest(
-            'timegm',
-            sub {
-                my $time = timegm( $sec, $min, $hour, $mday, $mon, $year );
+        for my $sub (qw( timegm timegm_nocheck timegm_modern )) {
+            subtest(
+                $sub,
+                sub {
+                    my $time = __PACKAGE__->can($sub)
+                        ->( $sec, $min, $hour, $mday, $mon, $year );
 
-                is_deeply(
-                    [ ( gmtime($time) )[ 0 .. 5 ] ],
-                    [ int($sec), $min, $hour, $mday, $mon, $year - 1900 ],
-                    "timegm for @{$vals}"
-                );
-            },
-        );
+                    is_deeply(
+                        [ ( gmtime($time) )[ 0 .. 5 ] ],
+                        [ int($sec), $min, $hour, $mday, $mon, $year - 1900 ],
+                        "timegm for @{$vals}"
+                    );
+                },
+            );
+        }
     }
 }
 
@@ -280,20 +287,84 @@ subtest(
         my $break        = ( $current_year + 50 ) - 100;
         my $post_break   = ( $current_year + 51 ) - 100;
 
-        is(
-            ( ( localtime( timelocal( 0, 0, 0, 1, 1, $pre_break ) ) )[5] ),
-            $pre_break + 100,
-            "year $pre_break is treated as next century",
+        subtest(
+            'legacy year munging',
+            sub {
+                is(
+                    (
+                        (
+                            localtime(
+                                timelocal( 0, 0, 0, 1, 1, $pre_break )
+                            )
+                        )[5]
+                    ),
+                    $pre_break + 100,
+                    "year $pre_break is treated as next century",
+                );
+                is(
+                    (
+                        ( localtime( timelocal( 0, 0, 0, 1, 1, $break ) ) )[5]
+                    ),
+                    $break + 100,
+                    "year $break is treated as next century",
+                );
+                is(
+                    (
+                        (
+                            localtime(
+                                timelocal( 0, 0, 0, 1, 1, $post_break )
+                            )
+                        )[5]
+                    ),
+                    $post_break,
+                    "year $post_break is treated as current century",
+                );
+            }
         );
-        is(
-            ( ( localtime( timelocal( 0, 0, 0, 1, 1, $break ) ) )[5] ),
-            $break + 100,
-            "year $break is treated as next century",
-        );
-        is(
-            ( ( localtime( timelocal( 0, 0, 0, 1, 1, $post_break ) ) )[5] ),
-            $post_break,
-            "year $post_break is treated as current century",
+
+        subtest(
+            'modern',
+            sub {
+                plan skip_all =>
+                    'Require negative epoch support and 64-bit time_t'
+                    unless $neg_epoch_ok && $epoch_is_64;
+
+                is(
+                    (
+                        (
+                            localtime(
+                                timelocal_modern( 0, 0, 0, 1, 1, $pre_break )
+                            )
+                        )[5]
+                    ) + 1900,
+                    $pre_break,
+                    "year $pre_break is treated as year $pre_break",
+                );
+                is(
+                    (
+                        (
+                            localtime(
+                                timelocal_modern( 0, 0, 0, 1, 1, $break )
+                            )
+                        )[5]
+                    ) + 1900,
+                    $break,
+                    "year $break is treated as year $break",
+                );
+                is(
+                    (
+                        (
+                            localtime(
+                                timelocal_modern(
+                                    0, 0, 0, 1, 1, $post_break
+                                )
+                            )
+                        )[5]
+                    ) + 1900,
+                    $post_break,
+                    "year $post_break is treated as year $post_break",
+                );
+            },
         );
     },
 );

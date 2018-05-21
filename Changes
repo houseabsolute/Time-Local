@@ -5,6 +5,10 @@
   treated as 1970, but starting in 2020 this would be treated as 2070
   instead. Reported by Bernhard M. Wiedemann. RT #124787.
 
+- Added timelocal_modern and timegm_modern variants as optional exports. These
+  versions do not munge years at all. They treat the year value that they are
+  given exactly as-is.
+
 
 1.25     2016-11-17
 
