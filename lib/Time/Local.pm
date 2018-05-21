@@ -184,7 +184,7 @@ sub timelocal {
         !$dst_off
         && ( ( $ref_t - SECS_PER_HOUR )
             - _timegm( localtime( $loc_t - SECS_PER_HOUR ) ) < 0 )
-        ) {
+    ) {
         return $loc_t - SECS_PER_HOUR;
     }
 
@@ -302,9 +302,10 @@ approximate range from Dec 1901 to Jan 2038.
 Both C<timelocal()> and C<timegm()> croak if given dates outside the supported
 range.
 
-As of version 5.12.0, perl has stopped using the underlying time library of
-the operating system it's running on and has its own implementation of those
-routines with a safe range of at least +/ 2**52 (about 142 million years).
+As of version 5.12.0, perl has stopped using the time implementation of the
+operating system it's running on. Instead, it has its own implementation of
+those routines with a safe range of at least +/- 2**52 (about 142 million
+years)
 
 =head2 Ambiguous Local Times (DST)
 
