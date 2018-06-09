@@ -4,7 +4,7 @@ Time::Local - Efficiently compute time from local and GMT time
 
 # VERSION
 
-version 1.26
+version 1.27
 
 # SYNOPSIS
 

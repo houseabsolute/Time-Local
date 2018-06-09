@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+1.27     2018-06-09
+
 - This release is identical to 1.26 except that it is a stable release, not a
   trial.
 
