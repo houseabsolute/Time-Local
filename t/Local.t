@@ -14,8 +14,7 @@ use Time::Local
 my $neg_epoch_ok
     = $^O eq 'VMS' ? 0 : defined( ( localtime(-259200) )[0] ) ? 1 : 0;
 
-my $epoch_is_64
-    = eval { $Config{ivsize} == 8 && ( gmtime 2**40 )[5] == 34912 };
+my $large_epoch_ok = eval { ( gmtime 2**40 )[5] == 34912 };
 
 {
     my %tests = _valid_time_tests();
@@ -258,11 +257,10 @@ subtest(
 );
 
 subtest(
-    '64-bit time_t values',
+    'Large epoch values',
     sub {
-        plan skip_all =>
-            'These tests require support for 64-bit time_t values'
-            unless $epoch_is_64;
+        plan skip_all => 'These tests require support for large epoch values'
+            unless $large_epoch_ok;
 
         is(
             timegm( 8, 14, 3, 19, 0, 2038 ), 2**31,
@@ -290,6 +288,9 @@ subtest(
         subtest(
             'legacy year munging',
             sub {
+                plan skip_all => 'Requires support for an large epoch values'
+                    unless $large_epoch_ok;
+
                 is(
                     (
                         (
@@ -326,8 +327,8 @@ subtest(
             'modern',
             sub {
                 plan skip_all =>
-                    'Require negative epoch support and 64-bit time_t'
-                    unless $neg_epoch_ok && $epoch_is_64;
+                    'Requires negative epoch support and large epoch support'
+                    unless $neg_epoch_ok && $large_epoch_ok;
 
                 is(
                     (
