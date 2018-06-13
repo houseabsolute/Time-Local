@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+1.28     2018-06-12
+
 - Some tests which required support for epoch values larger than 2**32 were
   not being skipped when the underlying Perl did not support that.
 
