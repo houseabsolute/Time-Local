@@ -11,7 +11,8 @@ use parent 'Exporter';
 
 our @EXPORT = qw( timegm timelocal );
 our @EXPORT_OK
-    = qw( timegm_modern timelocal_modern timegm_nocheck timelocal_nocheck );
+    = qw( timegm_modern timelocal_modern timegm_nocheck timelocal_nocheck
+          timegm_posix timelocal_posix );
 
 my @MonthDays = ( 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 );
 
@@ -106,7 +107,10 @@ sub _timegm {
 sub timegm {
     my ( $sec, $min, $hour, $mday, $month, $year ) = @_;
 
-    if ( $Options{no_year_munging} ) {
+    if ( $Options{posix_year} ) {
+        # years since 1900 directly
+    }
+    elsif ( $Options{no_year_munging} ) {
         $year -= 1900;
     }
     else {
@@ -175,6 +179,11 @@ sub timegm_modern {
     return &timegm;
 }
 
+sub timegm_posix {
+    local $Options{posix_year} = 1;
+    return &timegm;
+}
+
 sub timelocal {
     my $ref_t         = &timegm;
     my $loc_for_ref_t = _timegm( localtime($ref_t) );
@@ -222,6 +231,11 @@ sub timelocal_modern {
     return &timelocal;
 }
 
+sub timelocal_posix {
+    local $Options{posix_year} = 1;
+    return &timelocal;
+}
+
 1;
 
 # ABSTRACT: Efficiently compute time from local and GMT time
@@ -234,6 +248,18 @@ __END__
 
     my $time = timelocal( $sec, $min, $hour, $mday, $mon, $year );
     my $time = timegm( $sec, $min, $hour, $mday, $mon, $year );
+
+    # use direct year value (no 2-digit year heuristic)
+    use Time::Local qw(timelocal_modern timegm_modern);
+
+    my $time = timelocal_modern( $sec, $min, $hour, $mday, $mon, $year );
+    my $time = timegm_modern( $sec, $min, $hour, $mday, $mon, $year );
+
+    # use POSIX years since 1900 (true inverse of localtime()/gmtime())
+    use Time::Local qw(timelocal_posix timegm_posix);
+
+    my $time = timelocal_posix( $sec, $min, $hour, $mday, $mon, $year );
+    my $time = timegm_posix( $sec, $min, $hour, $mday, $mon, $year );
 
 =head1 DESCRIPTION
 
@@ -269,9 +295,22 @@ While it would be nice to make this the default behavior, that would almost
 certainly break a lot of code, so you must explicitly import these subs and
 use them instead of the default C<timelocal()> and C<timegm()>.
 
-You are B<strongly> encouraged to use these subs in any new code which uses
-this module. It will almost certainly make your code's behavior less
-surprising.
+You are B<strongly> encouraged to use these subs (or the below POSIX variants)
+in any new code which uses this module. It will almost certainly make your
+code's behavior less surprising.
+
+=head2 C<timelocal_posix()> and C<timegm_posix()>
+
+Like C<timelocal_modern()> and C<timegm_modern()>, these functions will not
+do any year munging, but expect a POSIX year value like the one returned by
+the POSIX (and core Perl) C<localtime()> and C<gmtime()> functions; that is,
+the number of years since C<1900>. This means these functions can reliably be
+used as the reverse of C<localtime()> and C<gmtime()>.
+
+    use Time::Local 'timelocal_posix';
+
+    # same as time()
+    my $time = timelocal_posix(localtime());
 
 =head2 C<timelocal()> and C<timegm()>
 
@@ -296,8 +335,9 @@ will be unpredictable (so don't do that).
 
 =head2 Year Value Interpretation
 
-B<This does not apply to C<timelocal_modern> or C<timegm_modern>. Use those
-exports if you want to ensure consistent behavior as your code ages.>
+B<This does not apply to C<timelocal_modern>, C<timegm_modern>,
+C<timelocal_posix>, or C<timegm_posix>. Use those exports if you want to
+ensure consistent behavior as your code ages.>
 
 Strictly speaking, the year should be specified in a form consistent with
 C<localtime()>, i.e. the offset from 1900. In order to make the interpretation

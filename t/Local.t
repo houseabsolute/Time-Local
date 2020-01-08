@@ -6,7 +6,8 @@ use warnings;
 use Config;
 use Test::More 0.96;
 use Time::Local
-    qw( timegm timelocal timegm_modern timelocal_modern timegm_nocheck timelocal_nocheck );
+    qw( timegm timelocal timegm_modern timelocal_modern
+        timegm_nocheck timelocal_nocheck timegm_posix timelocal_posix );
 
 # Use 3 days before the start of the epoch because with Borland on
 # Win32 it will work for -3600 _if_ your time zone is +01:00 (or
@@ -77,12 +78,13 @@ sub _test_group {
         # 1970 test on VOS fails
         next if $^O eq 'vos' && $year == 1970;
 
-        for my $sub (qw( timelocal timelocal_nocheck timelocal_modern )) {
+        for my $sub (qw( timelocal timelocal_nocheck timelocal_modern timelocal_posix )) {
             subtest(
                 $sub,
                 sub {
+                    my $year_value = $sub eq 'timelocal_posix' ? $year - 1900 : $year;
                     my $time = __PACKAGE__->can($sub)
-                        ->( $sec, $min, $hour, $mday, $mon, $year );
+                        ->( $sec, $min, $hour, $mday, $mon, $year_value );
 
                     is_deeply(
                         [ ( localtime($time) )[ 0 .. 5 ] ],
@@ -93,12 +95,13 @@ sub _test_group {
             );
         }
 
-        for my $sub (qw( timegm timegm_nocheck timegm_modern )) {
+        for my $sub (qw( timegm timegm_nocheck timegm_modern timegm_posix )) {
             subtest(
                 $sub,
                 sub {
+                    my $year_value = $sub eq 'timegm_posix' ? $year - 1900 : $year;
                     my $time = __PACKAGE__->can($sub)
-                        ->( $sec, $min, $hour, $mday, $mon, $year );
+                        ->( $sec, $min, $hour, $mday, $mon, $year_value );
 
                     is_deeply(
                         [ ( gmtime($time) )[ 0 .. 5 ] ],
@@ -362,6 +365,51 @@ subtest(
                             )
                         )[5]
                     ) + 1900,
+                    $post_break,
+                    "year $post_break is treated as year $post_break",
+                );
+            },
+        );
+
+        subtest(
+            'posix',
+            sub {
+                plan skip_all =>
+                    'Requires negative epoch support and large epoch support'
+                    unless $neg_epoch_ok && $large_epoch_ok;
+
+                is(
+                    (
+                        (
+                            localtime(
+                                timelocal_posix( 0, 0, 0, 1, 1, $pre_break )
+                            )
+                        )[5]
+                    ),
+                    $pre_break,
+                    "year $pre_break is treated as year $pre_break",
+                );
+                is(
+                    (
+                        (
+                            localtime(
+                                timelocal_posix( 0, 0, 0, 1, 1, $break )
+                            )
+                        )[5]
+                    ),
+                    $break,
+                    "year $break is treated as year $break",
+                );
+                is(
+                    (
+                        (
+                            localtime(
+                                timelocal_posix(
+                                    0, 0, 0, 1, 1, $post_break
+                                )
+                            )
+                        )[5]
+                    ),
                     $post_break,
                     "year $post_break is treated as year $post_break",
                 );
