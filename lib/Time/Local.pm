@@ -204,8 +204,8 @@ sub timelocal {
 
     return $loc_t if $dst_off > 0;
 
-    # If the original date was a non-extent gap in a forward DST jump,
-    # we should now have the wrong answer - undo the DST adjustment
+    # If the original date was a non-existent gap in a forward DST jump, we
+    # should now have the wrong answer - undo the DST adjustment
     my ( $s, $m, $h ) = localtime($loc_t);
     $loc_t -= $dst_off if $s != $_[0] || $m != $_[1] || $h != $_[2];
 
