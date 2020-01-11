@@ -5,8 +5,16 @@ use warnings;
 
 use Config;
 use Test::More 0.96;
-use Time::Local
-    qw( timegm timelocal timegm_modern timelocal_modern timegm_nocheck timelocal_nocheck );
+use Time::Local qw(
+    timegm
+    timelocal
+    timegm_modern
+    timelocal_modern
+    timegm_nocheck
+    timelocal_nocheck
+    timegm_posix
+    timelocal_posix
+);
 
 # Use 3 days before the start of the epoch because with Borland on
 # Win32 it will work for -3600 _if_ your time zone is +01:00 (or
@@ -78,34 +86,55 @@ sub _test_group {
         next if $^O eq 'vos' && $year == 1970;
 
         for my $sub (qw( timelocal timelocal_nocheck timelocal_modern )) {
-            subtest(
-                $sub,
-                sub {
-                    my $time = __PACKAGE__->can($sub)
-                        ->( $sec, $min, $hour, $mday, $mon, $year );
+            my $time = __PACKAGE__->can($sub)
+                ->( $sec, $min, $hour, $mday, $mon, $year );
 
-                    is_deeply(
-                        [ ( localtime($time) )[ 0 .. 5 ] ],
-                        [ int($sec), $min, $hour, $mday, $mon, $year - 1900 ],
-                        "timelocal for @{$vals}"
-                    );
+            my @lt = localtime($time);
+            is_deeply(
+                {
+                    second => $lt[0],
+                    minute => $lt[1],
+                    hour   => $lt[2],
+                    day    => $lt[3],
+                    month  => $lt[4],
+                    year   => $lt[5],
                 },
+                {
+                    second => int($sec),
+                    minute => $min,
+                    hour   => $hour,
+                    day    => $mday,
+                    month  => $mon,
+                    year   => $year - 1900,
+                },
+                "$sub for @{$vals}"
             );
         }
 
         for my $sub (qw( timegm timegm_nocheck timegm_modern )) {
-            subtest(
-                $sub,
-                sub {
-                    my $time = __PACKAGE__->can($sub)
-                        ->( $sec, $min, $hour, $mday, $mon, $year );
+            my $time = __PACKAGE__->can($sub)
+                ->( $sec, $min, $hour, $mday, $mon, $year );
 
-                    is_deeply(
-                        [ ( gmtime($time) )[ 0 .. 5 ] ],
-                        [ int($sec), $min, $hour, $mday, $mon, $year - 1900 ],
-                        "timegm for @{$vals}"
-                    );
+
+            my @gt = gmtime($time);
+            is_deeply(
+                {
+                    second => $gt[0],
+                    minute => $gt[1],
+                    hour   => $gt[2],
+                    day    => $gt[3],
+                    month  => $gt[4],
+                    year   => $gt[5],
                 },
+                {
+                    second => int($sec),
+                    minute => $min,
+                    hour   => $hour,
+                    day    => $mday,
+                    month  => $mon,
+                    year   => $year - 1900,
+                },
+                "$sub for @{$vals}"
             );
         }
     }
