@@ -90,7 +90,7 @@ sub _daygm {
                     - int( $year / 100 )
                     + int( $year / 400 )
                     + int( ( ( $month * 306 ) + 5 ) / 10 ) ) - $Epoc;
-            }
+        }
     );
 }
 
