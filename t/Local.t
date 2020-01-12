@@ -16,6 +16,20 @@ use Time::Local qw(
     timelocal_posix
 );
 
+my @local_subs = qw(
+    timelocal
+    timelocal_modern
+    timelocal_posix
+    timelocal_nocheck
+);
+
+my @gm_subs = qw(
+    timegm
+    timegm_modern
+    timegm_posix
+    timegm_nocheck
+);
+
 # Use 3 days before the start of the epoch because with Borland on
 # Win32 it will work for -3600 _if_ your time zone is +01:00 (or
 # greater).
@@ -85,9 +99,11 @@ sub _test_group {
         # 1970 test on VOS fails
         next if $^O eq 'vos' && $year == 1970;
 
-        for my $sub (qw( timelocal timelocal_nocheck timelocal_modern )) {
+        for my $sub (@local_subs) {
+            my $y = $year;
+            $y -= 1900 if $sub =~ /posix/;
             my $time = __PACKAGE__->can($sub)
-                ->( $sec, $min, $hour, $mday, $mon, $year );
+                ->( $sec, $min, $hour, $mday, $mon, $y );
 
             my @lt = localtime($time);
             is_deeply(
@@ -107,14 +123,15 @@ sub _test_group {
                     month  => $mon,
                     year   => $year - 1900,
                 },
-                "$sub for @{$vals}"
+                "$sub( $sec, $min, $hour, $mday, $mon, $y )"
             );
         }
 
-        for my $sub (qw( timegm timegm_nocheck timegm_modern )) {
+        for my $sub (@gm_subs) {
+            my $y = $year;
+            $y -= 1900 if $sub =~ /posix/;
             my $time = __PACKAGE__->can($sub)
-                ->( $sec, $min, $hour, $mday, $mon, $year );
-
+                ->( $sec, $min, $hour, $mday, $mon, $y );
 
             my @gt = gmtime($time);
             is_deeply(
@@ -134,82 +151,85 @@ sub _test_group {
                     month  => $mon,
                     year   => $year - 1900,
                 },
-                "$sub for @{$vals}"
+                "$sub( $sec, $min, $hour, $mday, $mon, $y )"
             );
         }
     }
 }
 
 subtest(
-    'bad times',
+    'diff between two calls',
     sub {
-        my %bad = (
-            'month too large'  => [ 1995, 13, 1,  1,  1,  1 ],
-            'day too large'    => [ 1995, 2,  30, 1,  1,  1 ],
-            'hour too large'   => [ 1995, 2,  10, 25, 1,  1 ],
-            'minute too large' => [ 1995, 2,  10, 1,  60, 1 ],
-            'second too large' => [ 1995, 2,  10, 1,  1,  60 ],
-        );
-
-        for my $key ( sort keys %bad ) {
+        for my $sub (@local_subs) {
             subtest(
-                $key,
+                $sub,
                 sub {
-                    my ( $year, $mon, $mday, $hour, $min, $sec )
-                        = @{ $bad{$key} };
-                    $mon--;
-
-                    local $@ = undef;
-                    eval { timegm( $sec, $min, $hour, $mday, $mon, $year ) };
-
-                    like(
-                        $@, qr/.*out of range.*/,
-                        "invalid time caused an error - @{$bad{$key}}"
+                    my $year = 1990;
+                    $year -= 1900 if $sub =~ /posix/;
+                    my $sub_ref = __PACKAGE__->can($sub);
+                    is(
+                              $sub_ref->( 0, 0, 1, 1, 0, $year )
+                            - $sub_ref->( 0, 0, 0, 1, 0, $year ),
+                        3600,
+                        'one hour difference between two calls'
                     );
-                }
+
+                    is(
+                              $sub_ref->( 1, 2, 3, 1, 0, $year + 1 )
+                            - $sub_ref->( 1, 2, 3, 31, 11, $year ),
+                        24 * 3600,
+                        'one day difference between two calls across year boundary',
+                    );
+                },
+            );
+        }
+
+        for my $sub (@gm_subs) {
+            subtest(
+                $sub,
+                sub {
+                    my $year = 1980;
+                    $year -= 1900 if $sub =~ /posix/;
+                    my $sub_ref = __PACKAGE__->can($sub);
+
+                    # Diff beween Jan 1, 1980 and Mar 1, 1980 = (31 + 29 = 60 days)
+                    is(
+                              $sub_ref->( 0, 0, 0, 1, 2, 80 )
+                            - $sub_ref->( 0, 0, 0, 1, 0, 80 ),
+                        60 * 24 * 3600,
+                        '60 day difference between two calls',
+                    );
+                },
             );
         }
     },
 );
 
 subtest(
-    'diff between two calls',
-    sub {
-        is(
-            timelocal( 0, 0, 1, 1, 0, 90 ) - timelocal( 0, 0, 0, 1, 0, 90 ),
-            3600,
-            'one hour difference between two calls to timelocal'
-        );
-
-        is(
-                  timelocal( 1, 2, 3, 1, 0, 100 )
-                - timelocal( 1, 2, 3, 31, 11, 99 ),
-            24 * 3600,
-            'one day difference between two calls to timelocal'
-        );
-
-        # Diff beween Jan 1, 1980 and Mar 1, 1980 = (31 + 29 = 60 days)
-        is(
-            timegm( 0, 0, 0, 1, 2, 80 ) - timegm( 0, 0, 0, 1, 0, 80 ),
-            60 * 24 * 3600,
-            '60 day difference between two calls to timegm'
-        );
-    },
-);
-
-subtest(
     'DST transition bug - https://rt.perl.org/Ticket/Display.html?id=19393',
     sub {
-        # At a DST transition, the clock skips forward, eg from 01:59:59 to
-        # 03:00:00. In this case, 02:00:00 is an invalid time, and should be
-        # treated like 03:00:00 rather than 01:00:00 - negative zone offsets
-        # used to do the latter.
-        {
-            my $hour = ( localtime( timelocal( 0, 0, 2, 7, 3, 102 ) ) )[2];
+        for my $sub (@local_subs) {
+            subtest(
+                $sub,
+                sub {
+                    my $year = 2002;
+                    $year -= 2002 if $sub =~ /posix/;
+                    my $sub_ref = __PACKAGE__->can($sub);
 
-            # testers in US/Pacific should get 3,
-            # other testers should get 2
-            ok( $hour == 2 || $hour == 3, 'hour should be 2 or 3' );
+                    # At a DST transition, the clock skips forward, eg from
+                    # 01:59:59 to 03:00:00. In this case, 02:00:00 is an
+                    # invalid time, and should be treated like 03:00:00 rather
+                    # than 01:00:00 - negative zone offsets used to do the
+                    # latter.
+                    my $hour
+                        = ( localtime( $sub_ref->( 0, 0, 2, 7, 3, 102 ) ) )
+                        [2];
+
+                    # testers in US/Pacific should get 3,
+                    # other testers should get 2
+                    ok( $hour == 2 || $hour == 3, 'hour should be 2 or 3' );
+                },
+            );
         }
     },
 );
@@ -244,44 +264,58 @@ subtest(
         plan skip_all => 'this platform does not support negative epochs.'
             unless $neg_epoch_ok;
 
-        local $@ = undef;
-        eval { timegm( 0, 0, 0, 29, 1, 1900 ) };
-        like(
-            $@, qr/Day '29' out of range 1\.\.28/,
-            'does not accept leap day in 1900'
-        );
+        for my $sub (@gm_subs) {
+            subtest(
+                $sub,
+                sub {
+                    my $year_mod = $sub =~ /posix/ ? -1900 : 0;
+                    my $sub_ref  = __PACKAGE__->can($sub);
 
-        local $@ = undef;
-        eval { timegm( 0, 0, 0, 29, 1, 200 ) };
-        like(
-            $@, qr/Day '29' out of range 1\.\.28/,
-            'does not accept leap day in 2100 (year passed as 200)'
-        );
+                    unless ( $sub =~ /nocheck/ ) {
+                        local $@ = undef;
+                        eval {
+                            $sub_ref->( 0, 0, 0, 29, 1, 1900 + $year_mod );
+                        };
+                        like(
+                            $@, qr/Day '29' out of range 1\.\.28/,
+                            'does not accept leap day in 1900'
+                        );
 
-        local $@ = undef;
-        eval { timegm( 0, 0, 0, 29, 1, 0 ) };
-        is(
-            $@, q{},
-            'no error with leap day of 2000 (year passed as 0)'
-        );
+                        local $@ = undef;
+                        eval { $sub_ref->( 0, 0, 0, 29, 1, 200 + $year_mod ) };
+                        like(
+                            $@, qr/Day '29' out of range 1\.\.28/,
+                            'does not accept leap day in 2100 (year passed as 200)'
+                        );
+                    }
 
-        local $@ = undef;
-        eval { timegm( 0, 0, 0, 29, 1, 1904 ) };
-        is( $@, q{}, 'no error with leap day of 1904' );
+                    local $@ = undef;
+                    eval { $sub_ref->( 0, 0, 0, 29, 1, 0 + $year_mod ) };
+                    is(
+                        $@, q{},
+                        'no error with leap day of 2000 (year passed as 0)'
+                    );
 
-        local $@ = undef;
-        eval { timegm( 0, 0, 0, 29, 1, 4 ) };
-        is(
-            $@, q{},
-            'no error with leap day of 2004 (year passed as 4)'
-        );
+                    local $@ = undef;
+                    eval { $sub_ref->( 0, 0, 0, 29, 1, 1904 + $year_mod ) };
+                    is( $@, q{}, 'no error with leap day of 1904' );
 
-        local $@ = undef;
-        eval { timegm( 0, 0, 0, 29, 1, 96 ) };
-        is(
-            $@, q{},
-            'no error with leap day of 1996 (year passed as 96)'
-        );
+                    local $@ = undef;
+                    eval { $sub_ref->( 0, 0, 0, 29, 1, 4 + $year_mod ) };
+                    is(
+                        $@, q{},
+                        'no error with leap day of 2004 (year passed as 4)'
+                    );
+
+                    local $@ = undef;
+                    eval { $sub_ref->( 0, 0, 0, 29, 1, 96 + $year_mod ) };
+                    is(
+                        $@, q{},
+                        'no error with leap day of 1996 (year passed as 96)'
+                    );
+                },
+            );
+        }
     },
 );
 
@@ -291,18 +325,31 @@ subtest(
         plan skip_all => 'These tests require support for large epoch values'
             unless $large_epoch_ok;
 
-        is(
-            timegm( 8, 14, 3, 19, 0, 2038 ), 2**31,
-            'can call timegm for 2**31 epoch seconds'
-        );
-        is(
-            timegm( 16, 28, 6, 7, 1, 2106 ), 2**32,
-            'can call timegm for 2**32 epoch seconds (on a 64-bit system)'
-        );
-        is(
-            timegm( 16, 36, 0, 20, 1, 36812 ), 2**40,
-            'can call timegm for 2**40 epoch seconds (on a 64-bit system)'
-        );
+        for my $sub (@gm_subs) {
+            subtest(
+                $sub,
+                sub {
+                    my $year_mod = $sub =~ /posix/ ? -1900 : 0;
+                    my $sub_ref  = __PACKAGE__->can($sub);
+
+                    is(
+                        $sub_ref->( 8, 14, 3, 19, 0, 2038 + $year_mod ),
+                        2**31,
+                        'can call with 2**31 epoch seconds',
+                    );
+                    is(
+                        $sub_ref->( 16, 28, 6, 7, 1, 2106 + $year_mod ),
+                        2**32,
+                        'can call with 2**32 epoch seconds (on a 64-bit system)',
+                    );
+                    is(
+                        $sub_ref->( 16, 36, 0, 20, 1, 36812 + $year_mod ),
+                        2**40,
+                        'can call with 2**40 epoch seconds (on a 64-bit system)',
+                    );
+                },
+            );
+        }
     },
 );
 
@@ -396,6 +443,64 @@ subtest(
                 );
             },
         );
+    },
+);
+
+subtest(
+    'invalid values',
+    sub {
+        my %bad = (
+            'month > bounds'  => [ 1995, 13, 1,  1,  1,  1 ],
+            'day > bounds'    => [ 1995, 2,  30, 1,  1,  1 ],
+            'hour > bounds'   => [ 1995, 2,  10, 25, 1,  1 ],
+            'minute > bounds' => [ 1995, 2,  10, 1,  60, 1 ],
+            'second > bounds' => [ 1995, 2,  10, 1,  1,  60 ],
+            'month < bounds'  => [ 1995, -1, 1,  1,  1,  1 ],
+            'day < bounds'    => [ 1995, 2,  -1, 1,  1,  1 ],
+            'hour < bounds'   => [ 1995, 2,  10, -1, 1,  1 ],
+            'minute < bounds' => [ 1995, 2,  10, 1,  -1, 1 ],
+            'second < bounds' => [ 1995, 2,  10, 1,  1,  -1 ],
+        );
+
+        for my $sub ( grep { !/nocheck/ } @local_subs, @gm_subs ) {
+            subtest(
+                $sub,
+                sub {
+                    for my $key ( sort keys %bad ) {
+                        my ( $year, $mon, $mday, $hour, $min, $sec )
+                            = @{ $bad{$key} };
+                        $mon--;
+
+                        local $@ = undef;
+                        eval {
+                            __PACKAGE__->can($sub)
+                                ->( $sec, $min, $hour, $mday, $mon, $year );
+                        };
+
+                        like(
+                            $@, qr/.*out of range.*/,
+                            "$key - @{ $bad{$key} }"
+                        );
+                    }
+                },
+            );
+        }
+
+        for my $sub ( grep {/nocheck/} @local_subs, @gm_subs ) {
+            subtest(
+                $sub,
+                sub {
+                    for my $key ( sort keys %bad ) {
+                        local $@ = q{};
+                        eval { __PACKAGE__->can($sub)->( @{ $bad{$key} } ); };
+                        is(
+                            $@, q{},
+                            "$key - @{ $bad{$key} } - no exception with checks disabled"
+                        );
+                    }
+                },
+            );
+        }
     },
 );
 
