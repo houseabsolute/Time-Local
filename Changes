@@ -1,5 +1,10 @@
 {{$NEXT}}
 
+- Added timelocal_posix() and timegm_posix() subs. These are _exact_ opposites
+  of Perl's timelocal() and timegm(), meaning that a round trip between the
+  two pairs always produces the same value.
+
+
 1.28     2018-06-12
 
 - Some tests which required support for epoch values larger than 2**32 were
