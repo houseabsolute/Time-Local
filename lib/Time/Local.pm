@@ -286,11 +286,6 @@ If you are working with data you know to be valid, you can speed your code up
 by using the "nocheck" variants, C<timelocal_nocheck()> and
 C<timegm_nocheck()>. These variants must be explicitly imported.
 
-    use Time::Local 'timelocal_nocheck';
-
-    # The 365th day of 1999
-    print scalar localtime timelocal_nocheck( 0, 0, 0, 365, 0, 99 );
-
 If you supply data which is not valid (month 27, second 1,000) the results
 will be unpredictable (so don't do that).
 
