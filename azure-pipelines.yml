@@ -10,20 +10,9 @@ stages:
     parameters:
       debug: true
 
-  - template: templates/helpers/linux.yml@ci-perl-helpers
-    parameters:
-      coverage: codecov
-      debug: true
-      use_default_perls: true
-
   - template: templates/helpers/macos.yml@ci-perl-helpers
     parameters:
       cache_key: "1"
-      debug: true
-      use_default_perls: true
-
-  - template: templates/helpers/windows.yml@ci-perl-helpers
-    parameters:
       debug: true
       use_default_perls: true
 
