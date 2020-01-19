@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+1.29     2020-01-18 (TRIAL RELEASE)
+
 - Added timelocal_posix() and timegm_posix() subs. These are _exact_ opposites
   of Perl's localtime() and gmtime(), meaning that a round trip between the
   two pairs always produces the same value.
