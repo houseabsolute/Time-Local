@@ -228,7 +228,8 @@ sub _test_dst_transition_bug {
 
                 # testers in US/Pacific should get 3,
                 # other testers should get 2
-                ok( $hour == 2 || $hour == 3, 'hour should be 2 or 3' );
+                ok( $hour == 2 || $hour == 3, 'hour should be 2 or 3' )
+                    or diag "hour = $hour";
             },
         );
     }
