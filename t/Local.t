@@ -392,7 +392,8 @@ sub _test_2_digit_years {
                             timelocal_modern( 0, 0, 0, 1, 1, $pre_break )
                         )
                     )[5]
-                ) + 1900,
+                )
+                + 1900,
                 $pre_break,
                 "year $pre_break is treated as year $pre_break",
             );
@@ -403,7 +404,8 @@ sub _test_2_digit_years {
                             timelocal_modern( 0, 0, 0, 1, 1, $break )
                         )
                     )[5]
-                ) + 1900,
+                )
+                + 1900,
                 $break,
                 "year $break is treated as year $break",
             );
@@ -414,7 +416,8 @@ sub _test_2_digit_years {
                             timelocal_modern( 0, 0, 0, 1, 1, $post_break )
                         )
                     )[5]
-                ) + 1900,
+                )
+                + 1900,
                 $post_break,
                 "year $post_break is treated as year $post_break",
             );

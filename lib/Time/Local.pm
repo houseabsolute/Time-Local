@@ -80,7 +80,7 @@ else {
     $Epoc = _daygm( gmtime(0) );
 }
 
-%Cheat = ();         # clear the cache as epoc has changed
+%Cheat = ();    # clear the cache as epoc has changed
 
 sub _daygm {
 
@@ -95,7 +95,8 @@ sub _daygm {
                 + int( $year / 4 )
                     - int( $year / 100 )
                     + int( $year / 400 )
-                    + int( ( ( $month * 306 ) + 5 ) / 10 ) ) - $Epoc;
+                    + int( ( ( $month * 306 ) + 5 ) / 10 ) )
+                - $Epoc;
         }
     );
 }
@@ -281,9 +282,9 @@ more details.
 These functions expect the year value to be the number of years since 1900,
 which is what the C<localtime()> and C<gmtime()> built-ins returns.
 
-They perform range checking by default on the input C<$sec>, C<$min>,
-C<$hour>, C<$mday>, and C<$mon> values and will croak (using C<Carp::croak()>)
-if given a value outside the allowed ranges.
+They perform range checking by default on the input C<$sec>, C<$min>, C<$hour>,
+C<$mday>, and C<$mon> values and will croak (using C<Carp::croak()>) if given a
+value outside the allowed ranges.
 
 While it would be nice to make this the default behavior, that would almost
 certainly break a lot of code, so you must explicitly import these functions
@@ -304,26 +305,26 @@ The default exports of C<timelocal()> and C<timegm()> do a complicated
 calculation when given a year value less than 1000. This leads to surprising
 results in many cases. See L</Year Value Interpretation> for details.
 
-The C<time*_modern()> functions do not do this year munging and simply take
-the year value as provided.
+The C<time*_modern()> functions do not do this year munging and simply take the
+year value as provided.
 
-They perform range checking by default on the input C<$sec>, C<$min>,
-C<$hour>, C<$mday>, and C<$mon> values and will croak (using C<Carp::croak()>)
-if given a value outside the allowed ranges.
+They perform range checking by default on the input C<$sec>, C<$min>, C<$hour>,
+C<$mday>, and C<$mon> values and will croak (using C<Carp::croak()>) if given a
+value outside the allowed ranges.
 
 =head2 C<timelocal()> and C<timegm()>
 
 This module exports two functions by default, C<timelocal()> and C<timegm()>.
 
-They perform range checking by default on the input C<$sec>, C<$min>,
-C<$hour>, C<$mday>, and C<$mon> values and will croak (using C<Carp::croak()>)
-if given a value outside the allowed ranges.
+They perform range checking by default on the input C<$sec>, C<$min>, C<$hour>,
+C<$mday>, and C<$mon> values and will croak (using C<Carp::croak()>) if given a
+value outside the allowed ranges.
 
-B<Warning: The year value interpretation that these functions and their
-nocheck variants use will almost certainly lead to bugs in your code, if not
-now, then in the future. You are strongly discouraged from using these in new
-code, and you should convert old code to using either the C<*_posix> or
-C<*_modern> functions if possible.>
+B<Warning: The year value interpretation that these functions and their nocheck
+variants use will almost certainly lead to bugs in your code, if not now, then
+in the future. You are strongly discouraged from using these in new code, and
+you should convert old code to using either the C<*_posix> or C<*_modern>
+functions if possible.>
 
 =head2 C<timelocal_nocheck()> and C<timegm_nocheck()>
 
@@ -331,8 +332,8 @@ If you are working with data you know to be valid, you can use the "nocheck"
 variants, C<timelocal_nocheck()> and C<timegm_nocheck()>. These variants must
 be explicitly imported.
 
-If you supply data which is not valid (month 27, second 1,000) the results
-will be unpredictable (so don't do that).
+If you supply data which is not valid (month 27, second 1,000) the results will
+be unpredictable (so don't do that).
 
 Note that my benchmarks show that this is just a 3% speed increase over the
 checked versions, so unless calling C<Time::Local> is the hottest spot in your
@@ -346,17 +347,16 @@ exports if you want to ensure consistent behavior as your code ages.>
 
 Strictly speaking, the year should be specified in a form consistent with
 C<localtime()>, i.e. the offset from 1900. In order to make the interpretation
-of the year easier for humans, however, who are more accustomed to seeing
-years as two-digit or four-digit values, the following conventions are
-followed:
+of the year easier for humans, however, who are more accustomed to seeing years
+as two-digit or four-digit values, the following conventions are followed:
 
 =over 4
 
 =item *
 
 Years greater than 999 are interpreted as being the actual year, rather than
-the offset from 1900. Thus, 1964 would indicate the year Martin Luther King
-won the Nobel prize, not the year 3864.
+the offset from 1900. Thus, 1964 would indicate the year Martin Luther King won
+the Nobel prize, not the year 3864.
 
 =item *
 
@@ -367,11 +367,11 @@ below regarding date range).
 =item *
 
 Years in the range 0..99 are interpreted as shorthand for years in the rolling
-"current century," defined as 50 years on either side of the current
-year. Thus, today, in 1999, 0 would refer to 2000, and 45 to 2045, but 55
-would refer to 1955. Twenty years from now, 55 would instead refer to
-2055. This is messy, but matches the way people currently think about two
-digit dates. Whenever possible, use an absolute four digit year instead.
+"current century," defined as 50 years on either side of the current year.
+Thus, today, in 1999, 0 would refer to 2000, and 45 to 2045, but 55 would refer
+to 1955. Twenty years from now, 55 would instead refer to 2055. This is messy,
+but matches the way people currently think about two digit dates. Whenever
+possible, use an absolute four digit year instead.
 
 =back
 
@@ -402,15 +402,15 @@ occurs for two different GMT times on the same day. For example, in the
 "Europe/Paris" time zone, the local time of 2001-10-28 02:30:00 can represent
 either 2001-10-28 00:30:00 GMT, B<or> 2001-10-28 01:30:00 GMT.
 
-When given an ambiguous local time, the timelocal() function will always
-return the epoch for the I<earlier> of the two possible GMT times.
+When given an ambiguous local time, the timelocal() function will always return
+the epoch for the I<earlier> of the two possible GMT times.
 
 =head2 Non-Existent Local Times (DST)
 
-When a DST change causes a locale clock to skip one hour forward, there will
-be an hour's worth of local times that don't exist. Again, for the
-"Europe/Paris" time zone, the local clock jumped from 2001-03-25 01:59:59 to
-2001-03-25 03:00:00.
+When a DST change causes a locale clock to skip one hour forward, there will be
+an hour's worth of local times that don't exist. Again, for the "Europe/Paris"
+time zone, the local clock jumped from 2001-03-25 01:59:59 to 2001-03-25
+03:00:00.
 
 If the C<timelocal()> function is given a non-existent local time, it will
 simply return an epoch value for the time one hour later.
@@ -433,15 +433,15 @@ These routines are quite efficient and yet are always guaranteed to agree with
 C<localtime()> and C<gmtime()>. We manage this by caching the start times of
 any months we've seen before. If we know the start time of the month, we can
 always calculate any time within the month.  The start times are calculated
-using a mathematical formula. Unlike other algorithms that do multiple calls
-to C<gmtime()>.
+using a mathematical formula. Unlike other algorithms that do multiple calls to
+C<gmtime()>.
 
-The C<timelocal()> function is implemented using the same cache. We just
-assume that we're translating a GMT time, and then fudge it when we're done
-for the timezone and daylight savings arguments. Note that the timezone is
-evaluated for each date because countries occasionally change their official
-timezones. Assuming that C<localtime()> corrects for these changes, this
-routine will also be correct.
+The C<timelocal()> function is implemented using the same cache. We just assume
+that we're translating a GMT time, and then fudge it when we're done for the
+timezone and daylight savings arguments. Note that the timezone is evaluated
+for each date because countries occasionally change their official timezones.
+Assuming that C<localtime()> corrects for these changes, this routine will also
+be correct.
 
 =head1 BUGS
 
@@ -449,9 +449,8 @@ The whole scheme for interpreting two-digit years can be considered a bug.
 
 =head1 AUTHORS EMERITUS
 
-This module is based on a Perl 4 library, timelocal.pl, that was
-included with Perl 4.036, and was most likely written by Tom
-Christiansen.
+This module is based on a Perl 4 library, timelocal.pl, that was included with
+Perl 4.036, and was most likely written by Tom Christiansen.
 
 The current version was written by Graham Barr.
 
