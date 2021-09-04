@@ -82,6 +82,11 @@
 1.1902  2010-12-16  TRIAL RELEASE
 
 - Merge all changes from blead perl.
+
+- This release removes `use integer` from the code, which means that if you
+  pass in non-integer values for seconds, you will get a non-integer value
+  back.
+
 - Try to restore compatibility with older perls, which don't have a 64bit
   capable localtime/gmtime.
 
