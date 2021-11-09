@@ -6,7 +6,7 @@ use integer;
 use Carp ();
 use Exporter;
 
-our $VERSION = '1.31';
+our $VERSION = '1.32';
 
 use parent 'Exporter';
 
