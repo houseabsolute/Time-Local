@@ -1,5 +1,17 @@
 {{$NEXT}}
 
+- Restored the use of "use integer", which was removed in 2010 as part of the
+  change to support a 64-bit time_t in Perl, regardless of the platform. The
+  timelocal() sub does very confusing things with non-integer seconds because
+  internally it calls the system's localtime() function. And that localtime()
+  function may strip off the non-integer portion of the seconds value. This
+  leads to extremely confusing results because of the math that this module
+  does on the return value of localtime() internally.
+
+  With "use integer" back in effect the results are much more
+  predictable. Based on a bug report from Dmitriy Shamatrin. GH #18.
+
+
 1.30     2020-01-26
 
 - Identical to 1.29.
