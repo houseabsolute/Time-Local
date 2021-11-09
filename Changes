@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+1.31     2021-11-09 (TRIAL RELEASE)
+
 - Restored the use of "use integer", which was removed in 2010 as part of the
   change to support a 64-bit time_t in Perl, regardless of the platform. The
   timelocal() sub does very confusing things with non-integer seconds because
