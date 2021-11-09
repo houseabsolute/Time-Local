@@ -1,6 +1,7 @@
 package Time::Local;
 
 use strict;
+use integer;
 
 use Carp ();
 use Exporter;

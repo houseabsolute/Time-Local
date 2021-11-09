@@ -49,6 +49,7 @@ subtest( 'negative epochs',            \&_test_negative_epochs );
 subtest( 'large epoch values',         \&_test_large_epoch_values );
 subtest( '2-digit years',              \&_test_2_digit_years );
 subtest( 'invalid values',             \&_test_invalid_values );
+subtest( 'non-integer seconds',        \&_test_non_integer_seconds );
 
 sub _test_valid_times {
     my %tests = (
@@ -478,6 +479,36 @@ sub _test_invalid_values {
             },
         );
     }
+}
+
+sub _test_non_integer_seconds {
+    my $epoch = 1636484894;
+
+    subtest(
+        'localtime',
+        sub {
+            my @lt = localtime($epoch);
+
+            for ( 1 .. 9 ) {
+                $lt[0] += 0.1;
+                my $time = timelocal_posix( @lt[ 0 .. 5 ] );
+                is( $time, $epoch, 'non-integer second is ignored' );
+            }
+        }
+    );
+
+    subtest(
+        'gmtime',
+        sub {
+            my @gt = gmtime($epoch);
+
+            for ( 1 .. 9 ) {
+                $gt[0] += 0.1;
+                my $time = timegm_posix( @gt[ 0 .. 5 ] );
+                is( $time, $epoch, 'non-integer second is ignored' );
+            }
+        }
+    );
 }
 
 done_testing();
