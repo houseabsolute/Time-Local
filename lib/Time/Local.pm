@@ -270,6 +270,8 @@ consistent with the values returned from C<localtime()> and C<gmtime()>.
 
 =head2 C<timelocal_posix()> and C<timegm_posix()>
 
+I<Since version 1.30.>
+
 These functions are the exact inverse of Perl's built-in C<localtime> and
 C<gmtime> functions. That means that calling C<< timelocal_posix(
 localtime($value) ) >> will always give you the same C<$value> you started
@@ -295,6 +297,8 @@ uses this module. It will almost certainly make your code's behavior less
 surprising.
 
 =head2 C<timelocal_modern()> and C<timegm_modern()>
+
+I<Since version 1.27.>
 
 When C<Time::Local> was first written, it was a common practice to represent
 years as a two-digit value like C<99> for C<1999> or C<1> for C<2001>. This
