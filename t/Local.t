@@ -173,19 +173,22 @@ sub _test_diff_between_two_calls {
                 my $year = 1990;
                 $year -= 1900 if $sub =~ /posix/;
                 my $sub_ref = __PACKAGE__->can($sub);
-                is(
-                          $sub_ref->( 0, 0, 1, 1, 0, $year )
-                        - $sub_ref->( 0, 0, 0, 1, 0, $year ),
-                    3600,
-                    'one hour difference between two calls'
-                );
 
-                is(
-                          $sub_ref->( 1, 2, 3, 1, 0, $year + 1 )
-                        - $sub_ref->( 1, 2, 3, 31, 11, $year ),
-                    24 * 3600,
-                    'one day difference between two calls across year boundary',
-                );
+                for my $sec ( 0, 0.1 ) {
+                    is(
+                              $sub_ref->( $sec, 0, 1, 1, 0, $year )
+                            - $sub_ref->( $sec, 0, 0, 1, 0, $year ),
+                        3600,
+                        'one hour difference between two calls'
+                    );
+
+                    is(
+                              $sub_ref->( $sec, 2, 3, 1, 0, $year + 1 )
+                            - $sub_ref->( $sec, 2, 3, 31, 11, $year ),
+                        24 * 3600,
+                        'one day difference between two calls across year boundary',
+                    );
+                }
             },
         );
     }
@@ -198,13 +201,16 @@ sub _test_diff_between_two_calls {
                 $year -= 1900 if $sub =~ /posix/;
                 my $sub_ref = __PACKAGE__->can($sub);
 
-                # Diff beween Jan 1, 1980 and Mar 1, 1980 = (31 + 29 = 60 days)
-                is(
-                          $sub_ref->( 0, 0, 0, 1, 2, 80 )
-                        - $sub_ref->( 0, 0, 0, 1, 0, 80 ),
-                    60 * 24 * 3600,
-                    '60 day difference between two calls',
-                );
+                for my $sec ( 0, 0.1 ) {
+
+                    # Diff beween Jan 1, 1980 and Mar 1, 1980 = (31 + 29 = 60 days)
+                    is(
+                              $sub_ref->( $sec, 0, 0, 1, 2, 80 )
+                            - $sub_ref->( $sec, 0, 0, 1, 0, 80 ),
+                        60 * 24 * 3600,
+                        '60 day difference between two calls',
+                    );
+                }
             },
         );
     }
@@ -482,33 +488,58 @@ sub _test_invalid_values {
 }
 
 sub _test_non_integer_seconds {
-    my $epoch = 1636484894;
+    my @epochs = ( 0, 1636484894 );
+    push @epochs, -1636484894 if $neg_epoch_ok;
 
-    subtest(
-        'localtime',
-        sub {
-            my @lt = localtime($epoch);
+    # We want to get a lot of different values to smoke out floating point
+    # issues.
+    for my $i ( 1 .. 30 ) {
+        push @epochs, $i * 11;
+        push @epochs, $i * 11 * -1 if $neg_epoch_ok;
+    }
 
-            for ( 1 .. 9 ) {
-                $lt[0] += 0.1;
-                my $time = timelocal_posix( @lt[ 0 .. 5 ] );
-                is( $time, $epoch, 'non-integer second is ignored' );
+    for my $epoch (@epochs) {
+        subtest(
+            "epoch = $epoch",
+            sub {
+                subtest(
+                    'localtime',
+                    sub {
+                        my @lt       = localtime($epoch);
+                        my $orig_sec = $lt[0];
+
+                        for my $i ( 1 .. 99 ) {
+                            my $subsec = $i / 100;
+                            $lt[0] = $orig_sec + $subsec;
+                            my $time = timelocal_posix( @lt[ 0 .. 5 ] );
+                            is(
+                                $time, $epoch + $subsec,
+                                "non-integer second of $subsec"
+                            );
+                        }
+                    }
+                );
+
+                subtest(
+                    'gmtime',
+                    sub {
+                        my @gt       = ( gmtime($epoch) )[ 0 .. 5 ];
+                        my $orig_sec = $gt[0];
+
+                        for my $i ( 1 .. 99 ) {
+                            my $subsec = $i / 100;
+                            $gt[0] = $orig_sec + $subsec;
+                            my $time = timegm_posix(@gt);
+                            is(
+                                $time, $epoch + $subsec,
+                                "non-integer second of $subsec"
+                            );
+                        }
+                    }
+                );
             }
-        }
-    );
-
-    subtest(
-        'gmtime',
-        sub {
-            my @gt = gmtime($epoch);
-
-            for ( 1 .. 9 ) {
-                $gt[0] += 0.1;
-                my $time = timegm_posix( @gt[ 0 .. 5 ] );
-                is( $time, $epoch, 'non-integer second is ignored' );
-            }
-        }
-    );
+        );
+    }
 }
 
 done_testing();

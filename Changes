@@ -1,5 +1,12 @@
 {{$NEXT}}
 
+- This is an alternative to the changes in the 1.31 release. Instead of
+  restoring "use integer", the code now explicitly handles non-integer seconds
+  values. This fixes the confusing things that timelocal() does with
+  non-integer seconds but does not turn the seconds value into an
+  integer. Based on a bug report from Dmitriy Shamatrin. GH #18.
+
+
 1.31     2021-11-09 (TRIAL RELEASE)
 
 - Restored the use of "use integer", which was removed in 2010 as part of the

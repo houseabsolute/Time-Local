@@ -1,7 +1,6 @@
 package Time::Local;
 
 use strict;
-use integer;
 
 use Carp ();
 use Exporter;
@@ -113,6 +112,8 @@ sub _timegm {
 
 sub timegm {
     my ( $sec, $min, $hour, $mday, $month, $year ) = @_;
+    my $subsec = $sec - int($sec);
+    $sec = int($sec);
 
     if ( $Options{no_year_munging} ) {
         $year -= 1900;
@@ -158,11 +159,16 @@ sub timegm {
         Carp::croak($msg);
     }
 
-    return
-          $sec + $SecOff
-        + ( SECS_PER_MINUTE * $min )
-        + ( SECS_PER_HOUR * $hour )
-        + ( SECS_PER_DAY * $days );
+    # Adding in the $subsec value last seems to prevent floating point errors
+    # from creeping in.
+    return (
+        (
+                  $sec + $SecOff
+                + ( SECS_PER_MINUTE * $min )
+                + ( SECS_PER_HOUR * $hour )
+                + ( SECS_PER_DAY * $days )
+        ) + $subsec
+    );
 }
 
 sub _is_leap_year {
@@ -189,11 +195,16 @@ sub timegm_posix {
 }
 
 sub timelocal {
+    my $sec    = shift;
+    my $subsec = $sec - int($sec);
+    $sec = int($sec);
+    unshift @_, $sec;
+
     my $ref_t         = &timegm;
     my $loc_for_ref_t = _timegm( localtime($ref_t) );
 
     my $zone_off = $loc_for_ref_t - $ref_t
-        or return $loc_for_ref_t;
+        or return $loc_for_ref_t + $subsec;
 
     # Adjust for timezone
     my $loc_t = $ref_t - $zone_off;
@@ -209,20 +220,20 @@ sub timelocal {
         && ( ( $ref_t - SECS_PER_HOUR )
             - _timegm( localtime( $loc_t - SECS_PER_HOUR ) ) < 0 )
     ) {
-        return $loc_t - SECS_PER_HOUR;
+        return ( $loc_t - SECS_PER_HOUR ) + $subsec;
     }
 
     # Adjust for DST change
     $loc_t += $dst_off;
 
-    return $loc_t if $dst_off > 0;
+    return $loc_t + $subsec if $dst_off > 0;
 
     # If the original date was a non-existent gap in a forward DST jump, we
     # should now have the wrong answer - undo the DST adjustment
     my ( $s, $m, $h ) = localtime($loc_t);
     $loc_t -= $dst_off if $s != $_[0] || $m != $_[1] || $h != $_[2];
 
-    return $loc_t;
+    return $loc_t + $subsec;
 }
 
 sub timelocal_nocheck {
