@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+1.33     2023-02-12 (TRIAL RELEASE)
+
 - Fix for breakage on (some?) 32-bit platforms. If an integer calculation done
   internally overflowed all calls to this module's subs could error with "Day
   too big - 105412 > -2147483648". This fix reduces the range of acceptable
