@@ -4,7 +4,7 @@ Time::Local - Efficiently compute time from local and GMT time
 
 # VERSION
 
-version 1.31
+version 1.32
 
 # SYNOPSIS
 
@@ -31,6 +31,8 @@ consistent with the values returned from `localtime()` and `gmtime()`.
 
 ## `timelocal_posix()` and `timegm_posix()`
 
+_Since version 1.30._
+
 These functions are the exact inverse of Perl's built-in `localtime` and
 `gmtime` functions. That means that calling `timelocal_posix(
 localtime($value) )` will always give you the same `$value` you started
@@ -56,6 +58,8 @@ uses this module. It will almost certainly make your code's behavior less
 surprising.
 
 ## `timelocal_modern()` and `timegm_modern()`
+
+_Since version 1.27._
 
 When `Time::Local` was first written, it was a common practice to represent
 years as a two-digit value like `99` for `1999` or `1` for `2001`. This
@@ -221,11 +225,12 @@ Dave Rolsky <autarch@urth.org>
 - Florian Ragwitz <rafl@debian.org>
 - Gregory Oschwald <oschwald@gmail.com>
 - J. Nick Koston <nick@cpanel.net>
+- Tom Wyant <wyant@cpan.org>
 - Unknown <unknown@example.com>
 
 # COPYRIGHT AND LICENSE
 
-This software is copyright (c) 1997 - 2021 by Graham Barr & Dave Rolsky.
+This software is copyright (c) 1997 - 2023 by Graham Barr & Dave Rolsky.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
