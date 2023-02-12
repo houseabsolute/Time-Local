@@ -1,5 +1,11 @@
 {{$NEXT}}
 
+- Fix for breakage on (some?) 32-bit platforms. If an integer calculation done
+  internally overflowed all calls to this module's subs could error with "Day
+  too big - 105412 > -2147483648". This fix reduces the range of acceptable
+  epochs but should make the module usable again on such systems.
+
+
 1.32     2023-02-12 (TRIAL RELEASE)
 
 - This is an alternative to the changes in the 1.31 release. Instead of

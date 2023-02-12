@@ -58,6 +58,18 @@ if ( $] < 5.012000 ) {
 else {
     # recent localtime()'s limit is the year 2**31
     $MaxDay = 365 * ( 2**31 );
+
+    # On (some?) 32-bit platforms this overflows and we end up with a negative
+    # $MaxDay, which totally breaks this module. This is the old calculation
+    # we used from the days before Perl always had 64-bit time_t.
+    if ( $MaxDay < 0 ) {
+        require Config;
+        ## no critic (Variables::ProhibitPackageVars)
+        my $max_int
+            = ( ( 1 << ( 8 * $Config::Config{intsize} - 2 ) ) - 1 ) * 2 + 1;
+        $MaxDay
+            = int( ( $max_int - ( SECS_PER_DAY / 2 ) ) / SECS_PER_DAY ) - 1;
+    }
 }
 
 # Determine the EPOC day for this machine
