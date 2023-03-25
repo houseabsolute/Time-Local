@@ -1,5 +1,8 @@
 {{$NEXT}}
 
+- Fix for test failures seen on 32-bit systems with older Perl versions.
+
+
 1.33     2023-02-12 (TRIAL RELEASE)
 
 - Fix for breakage on (some?) 32-bit platforms. If an integer calculation done

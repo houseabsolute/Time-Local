@@ -206,8 +206,8 @@ sub _test_diff_between_two_calls {
 
                     # Diff beween Jan 1, 1980 and Mar 1, 1980 = (31 + 29 = 60 days)
                     is(
-                              $sub_ref->( $sec, 0, 0, 1, 2, 80 )
-                            - $sub_ref->( $sec, 0, 0, 1, 0, 80 ),
+                              $sub_ref->( $sec, 0, 0, 1, 2, $year )
+                            - $sub_ref->( $sec, 0, 0, 1, 0, $year ),
                         60 * 24 * 3600,
                         '60 day difference between two calls',
                     );
