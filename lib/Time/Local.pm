@@ -160,9 +160,8 @@ sub timegm {
 
     my $days = _daygm( undef, undef, undef, $mday, $month, $year );
 
-    unless ( $Options{no_range_check} or abs($days) < $MaxDay ) {
-        my $msg = q{};
-        $msg .= "Day too big - $days > $MaxDay\n" if $days > $MaxDay;
+    if ( abs($days) > $MaxDay && !$Options{no_range_check} ) {
+        my $msg = "Day too big - abs($days) > $MaxDay\n";
 
         $year += 1900;
         $msg
