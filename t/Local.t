@@ -36,7 +36,8 @@ my @gm_subs = qw(
 my $neg_epoch_ok
     = $^O eq 'VMS' ? 0 : defined( ( localtime(-259200) )[0] ) ? 1 : 0;
 
-my $large_epoch_ok = eval { ( gmtime 2**40 )[5] == 34912 };
+# On some old 32-bit Perls the call to gmtime here may return an undef.
+my $large_epoch_ok = eval { ( ( gmtime 2**40 )[5] || 0 ) == 34912 };
 
 subtest( 'valid times',            \&_test_valid_times );
 subtest( 'diff between two calls', \&_test_diff_between_two_calls );
