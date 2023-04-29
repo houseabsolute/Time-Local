@@ -1,5 +1,13 @@
 {{$NEXT}}
 
+- This is the same as 1.34.
+
+- The code now explicitly handles non-integer seconds values. This fixes the
+  confusing things that timelocal() does with non-integer seconds but does not
+  turn the seconds value into an integer. Based on a bug report from Dmitriy
+  Shamatrin. GH #18.
+
+
 1.34     2023-03-25 (TRIAL RELEASE)
 
 - Fix for test failures seen on 32-bit systems with older Perl versions.
