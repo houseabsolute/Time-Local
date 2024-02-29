@@ -19,7 +19,7 @@ our @EXPORT_OK = qw(
     timelocal_posix
 );
 
-my @MonthDays = ( 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 );
+my @MonthDays = ( 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 );
 
 # Determine breakpoint for rolling century
 my $ThisYear    = ( localtime() )[5];
