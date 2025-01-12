@@ -202,7 +202,7 @@
 
 - Reverted changes from 1.07_90 that attempted to extend range of
   allowable epoch values around edge cases. It turns out that this was
-  causing integer overflows
+  causing integer overflows.
 
 - In one error case, the module could warn and then croak. I changed
   it to simply croak with the whole message. Based on a patch by
